@@ -1,0 +1,101 @@
+{
+  "template": "app",
+  "imports": {
+    "Volo.Abp.LeptonXLiteTheme": {
+      "version": "4.1.0",
+      "isInstalled": true
+    },
+    "Volo.Abp.Account": {
+      "version": "9.1.0",
+      "isInstalled": true
+    },
+    "Volo.Abp.OpenIddict": {
+      "version": "9.1.0",
+      "isInstalled": true
+    },
+    "Volo.Abp.Identity": {
+      "version": "9.1.0",
+      "isInstalled": true
+    },
+    "Volo.Abp.TenantManagement": {
+      "version": "9.1.0",
+      "isInstalled": true
+    },
+    "Volo.Abp.SettingManagement": {
+      "version": "9.1.0",
+      "isInstalled": true
+    },
+    "Volo.Abp.PermissionManagement": {
+      "version": "9.1.0",
+      "isInstalled": true
+    },
+    "Volo.Abp.FeatureManagement": {
+      "version": "9.1.0",
+      "isInstalled": true
+    }
+  },
+  "folders": {
+    "items": {
+      "src": {},
+      "test": {}
+    }
+  },
+  "packages": {
+    "Wallee.Mcp.Application": {
+      "path": "src/Wallee.Mcp.Application/Wallee.Mcp.Application.abppkg",
+      "folder": "src"
+    },
+    "Wallee.Mcp.Application.Tests": {
+      "path": "test/Wallee.Mcp.Application.Tests/Wallee.Mcp.Application.Tests.abppkg",
+      "folder": "test"
+    },
+    "Wallee.Mcp.Domain.Shared": {
+      "path": "src/Wallee.Mcp.Domain.Shared/Wallee.Mcp.Domain.Shared.abppkg",
+      "folder": "src"
+    },
+    "Wallee.Mcp.Application.Contracts": {
+      "path": "src/Wallee.Mcp.Application.Contracts/Wallee.Mcp.Application.Contracts.abppkg",
+      "folder": "src"
+    },
+    "Wallee.Mcp.HttpApi": {
+      "path": "src/Wallee.Mcp.HttpApi/Wallee.Mcp.HttpApi.abppkg",
+      "folder": "src"
+    },
+    "Wallee.Mcp.HttpApi.Client": {
+      "path": "src/Wallee.Mcp.HttpApi.Client/Wallee.Mcp.HttpApi.Client.abppkg",
+      "folder": "src"
+    },
+    "Wallee.Mcp.EntityFrameworkCore.Tests": {
+      "path": "test/Wallee.Mcp.EntityFrameworkCore.Tests/Wallee.Mcp.EntityFrameworkCore.Tests.abppkg",
+      "folder": "test"
+    },
+    "Wallee.Mcp.EntityFrameworkCore": {
+      "path": "src/Wallee.Mcp.EntityFrameworkCore/Wallee.Mcp.EntityFrameworkCore.abppkg",
+      "folder": "src"
+    },
+    "Wallee.Mcp.TestBase": {
+      "path": "test/Wallee.Mcp.TestBase/Wallee.Mcp.TestBase.abppkg",
+      "folder": "test"
+    },
+    "Wallee.Mcp.Domain.Tests": {
+      "path": "test/Wallee.Mcp.Domain.Tests/Wallee.Mcp.Domain.Tests.abppkg",
+      "folder": "test"
+    },
+    "Wallee.Mcp.HttpApi.Client.ConsoleTestApp": {
+      "path": "test/Wallee.Mcp.HttpApi.Client.ConsoleTestApp/Wallee.Mcp.HttpApi.Client.ConsoleTestApp.abppkg",
+      "folder": "test"
+    },
+    "Wallee.Mcp.DbMigrator": {
+      "path": "src/Wallee.Mcp.DbMigrator/Wallee.Mcp.DbMigrator.abppkg",
+      "folder": "src"
+    },
+    "Wallee.Mcp.HttpApi.Host": {
+      "path": "src/Wallee.Mcp.HttpApi.Host/Wallee.Mcp.HttpApi.Host.abppkg",
+      "folder": "src"
+    },
+    "Wallee.Mcp.Domain": {
+      "path": "src/Wallee.Mcp.Domain/Wallee.Mcp.Domain.abppkg",
+      "folder": "src"
+    }
+  }
+}
