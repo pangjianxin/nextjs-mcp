@@ -39,6 +39,8 @@ using Volo.Abp.OpenIddict;
 using Volo.Abp.Swashbuckle;
 using Volo.Abp.Studio.Client.AspNetCore;
 using Volo.Abp.Security.Claims;
+using System.Net.Http.Headers;
+using System.Net.Http;
 
 namespace Wallee.Mcp;
 
@@ -65,6 +67,13 @@ public class McpHttpApiHostModule : AbpModule
             .AddMcpServer()
             .WithHttpTransport()
             .WithToolsFromAssembly();
+
+        context.Services.AddSingleton(_ =>
+        {
+            var client = new HttpClient() { BaseAddress = new Uri("https://api.weather.gov") };
+            client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("weather-tool", "1.0"));
+            return client;
+        });
 
         PreConfigure<OpenIddictBuilder>(builder =>
         {
@@ -252,7 +261,7 @@ public class McpHttpApiHostModule : AbpModule
         app.UseAbpSecurityHeaders();
         app.UseCors();
 
-       
+
 
         app.UseAuthentication();
         app.UseAbpOpenIddictValidation();
