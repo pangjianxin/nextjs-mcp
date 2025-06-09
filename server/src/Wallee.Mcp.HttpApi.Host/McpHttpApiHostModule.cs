@@ -41,6 +41,7 @@ using Volo.Abp.Studio.Client.AspNetCore;
 using Volo.Abp.Security.Claims;
 using System.Net.Http.Headers;
 using System.Net.Http;
+using Microsoft.SemanticKernel;
 
 namespace Wallee.Mcp;
 
@@ -105,7 +106,7 @@ public class McpHttpApiHostModule : AbpModule
         var configuration = context.Services.GetConfiguration();
         var hostingEnvironment = context.Services.GetHostingEnvironment();
 
-       
+
 
         if (!configuration.GetValue<bool>("App:DisablePII"))
         {
@@ -134,6 +135,7 @@ public class McpHttpApiHostModule : AbpModule
         ConfigureSwagger(context, configuration);
         ConfigureVirtualFileSystem(context);
         ConfigureCors(context, configuration);
+        ConfigureSemanticKernel(context, configuration);
     }
 
     private void ConfigureAuthentication(ServiceConfigurationContext context)
@@ -233,6 +235,23 @@ public class McpHttpApiHostModule : AbpModule
         });
     }
 
+    private void ConfigureSemanticKernel(ServiceConfigurationContext context, IConfiguration configuration)
+    {
+        context.Services.AddTransient<Kernel>(serviceProvider =>
+        {
+            IKernelBuilder kernelBuilder = Kernel.CreateBuilder();
+
+            kernelBuilder.AddOpenAIChatCompletion(
+                modelId: configuration["DeepSeek:ModelId"]!,
+                endpoint: new Uri(configuration["DeepSeek:EndPoint"]!),
+                apiKey: configuration["DeepSeek:ApiKey"]!,
+                serviceId: "deep-seek"
+                );
+
+            return kernelBuilder.Build();
+        });
+    }
+
     private void ConfigureHealthChecks(ServiceConfigurationContext context)
     {
         context.Services.AddMcpHealthChecks();
@@ -242,6 +261,7 @@ public class McpHttpApiHostModule : AbpModule
     {
         var app = context.GetApplicationBuilder();
         var env = context.GetEnvironment();
+
 
         app.UseForwardedHeaders();
 
@@ -262,9 +282,6 @@ public class McpHttpApiHostModule : AbpModule
         app.UseRouting();
         app.UseAbpSecurityHeaders();
         app.UseCors();
-
-
-
         app.UseAuthentication();
         app.UseAbpOpenIddictValidation();
 
@@ -276,6 +293,17 @@ public class McpHttpApiHostModule : AbpModule
         app.UseUnitOfWork();
         app.UseDynamicClaims();
         app.UseAuthorization();
+
+        //MCP Server
+        app.UseEndpoints(it =>
+        {
+            var builder = it.MapMcp();
+            //builder.RequireAuthorization(policy =>
+            //{
+            //    // policy.RequireAuthenticatedUser();
+            //    //policy.RequireRole("mcp.read"); 
+            //});
+        });
 
         app.UseSwagger();
         app.UseAbpSwaggerUI(options =>

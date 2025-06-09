@@ -43,7 +43,6 @@ public class Program
             await builder.AddApplicationAsync<McpHttpApiHostModule>();
             var app = builder.Build();
             app.MapDefaultEndpoints();
-            app.MapMcp();
             await app.InitializeApplicationAsync();
             await app.RunAsync();
             return 0;
