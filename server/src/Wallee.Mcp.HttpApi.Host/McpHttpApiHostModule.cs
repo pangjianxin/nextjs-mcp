@@ -1,47 +1,42 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.AspNetCore.Extensions.DependencyInjection;
-using OpenIddict.Validation.AspNetCore;
-using OpenIddict.Server.AspNetCore;
-using Wallee.Mcp.EntityFrameworkCore;
-using Wallee.Mcp.MultiTenancy;
-using Wallee.Mcp.HealthChecks;
 using Microsoft.OpenApi.Models;
+using Microsoft.SemanticKernel;
+using OpenIddict.Server.AspNetCore;
+using OpenIddict.Validation.AspNetCore;
+using System;
+using System.IO;
+using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using Volo.Abp;
-using Volo.Abp.Studio;
 using Volo.Abp.Account;
 using Volo.Abp.Account.Web;
 using Volo.Abp.AspNetCore.MultiTenancy;
 using Volo.Abp.AspNetCore.Mvc;
-using Volo.Abp.Autofac;
-using Volo.Abp.Localization;
-using Volo.Abp.Modularity;
-using Volo.Abp.UI.Navigation.Urls;
-using Volo.Abp.VirtualFileSystem;
 using Volo.Abp.AspNetCore.Mvc.UI.Bundling;
-using Volo.Abp.AspNetCore.Mvc.UI.Theme.Shared;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.LeptonXLite;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.LeptonXLite.Bundling;
-using Microsoft.AspNetCore.Hosting;
+using Volo.Abp.AspNetCore.Mvc.UI.Theme.Shared;
 using Volo.Abp.AspNetCore.Serilog;
-using Volo.Abp.Identity;
+using Volo.Abp.Autofac;
+using Volo.Abp.Modularity;
 using Volo.Abp.OpenIddict;
-using Volo.Abp.Swashbuckle;
-using Volo.Abp.Studio.Client.AspNetCore;
 using Volo.Abp.Security.Claims;
-using System.Net.Http.Headers;
-using System.Net.Http;
-using Microsoft.SemanticKernel;
+using Volo.Abp.Studio.Client.AspNetCore;
+using Volo.Abp.Swashbuckle;
+using Volo.Abp.UI.Navigation.Urls;
+using Volo.Abp.VirtualFileSystem;
+using Wallee.Mcp.EntityFrameworkCore;
+using Wallee.Mcp.HealthChecks;
+using Wallee.Mcp.McpServers;
+using Wallee.Mcp.MultiTenancy;
 
 namespace Wallee.Mcp;
 
@@ -63,18 +58,6 @@ public class McpHttpApiHostModule : AbpModule
     {
         var hostingEnvironment = context.Services.GetHostingEnvironment();
         var configuration = context.Services.GetConfiguration();
-
-        context.Services
-            .AddMcpServer()
-            .WithHttpTransport()
-            .WithToolsFromAssembly();
-
-        context.Services.AddSingleton(_ =>
-        {
-            var client = new HttpClient() { BaseAddress = new Uri("https://api.weather.gov") };
-            client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("weather-tool", "1.0"));
-            return client;
-        });
 
         PreConfigure<OpenIddictBuilder>(builder =>
         {
@@ -106,8 +89,6 @@ public class McpHttpApiHostModule : AbpModule
         var configuration = context.Services.GetConfiguration();
         var hostingEnvironment = context.Services.GetHostingEnvironment();
 
-
-
         if (!configuration.GetValue<bool>("App:DisablePII"))
         {
             Microsoft.IdentityModel.Logging.IdentityModelEventSource.ShowPII = true;
@@ -131,11 +112,20 @@ public class McpHttpApiHostModule : AbpModule
         ConfigureUrls(configuration);
         ConfigureBundles();
         ConfigureConventionalControllers();
-        ConfigureHealthChecks(context);
+        //ConfigureHealthChecks(context);
         ConfigureSwagger(context, configuration);
         ConfigureVirtualFileSystem(context);
         ConfigureCors(context, configuration);
+        ConfigMcpServer(context);
         ConfigureSemanticKernel(context, configuration);
+
+
+        context.Services.AddSingleton(_ =>
+        {
+            var client = new HttpClient() { BaseAddress = new Uri("https://api.weather.gov") };
+            client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("weather-tool", "1.0"));
+            return client;
+        });
     }
 
     private void ConfigureAuthentication(ServiceConfigurationContext context)
@@ -233,6 +223,14 @@ public class McpHttpApiHostModule : AbpModule
                     .AllowCredentials();
             });
         });
+    }
+
+    private void ConfigMcpServer(ServiceConfigurationContext context)
+    {
+        context.Services
+           .AddMcpServer()
+           .WithHttpTransport()
+           .WithToolsFromAssembly(typeof(TimeTool).Assembly);
     }
 
     private void ConfigureSemanticKernel(ServiceConfigurationContext context, IConfiguration configuration)

@@ -11,7 +11,7 @@ var postgres = builder.AddPostgres("postgres", builder.AddParameter("pg-user", f
     .AddDatabase("mcp");
 
 
-builder.AddProject<Projects.Wallee_Mcp_HttpApi_Host>("mcp-httpapi-host", "http")
+builder.AddProject<Projects.Wallee_Mcp_HttpApi_Host>("mcp-server", "http")
     .WaitFor(postgres)
     .WithReference(postgres);
 
