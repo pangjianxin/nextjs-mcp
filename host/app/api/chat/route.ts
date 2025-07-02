@@ -1,45 +1,44 @@
-import { deepseek } from "@ai-sdk/deepseek";
-import { streamText, experimental_createMCPClient } from "ai";
-import { z } from "zod";
-// Allow responses up to 30 seconds
-export const maxDuration = 30;
+import { deepseek } from "@ai-sdk/deepseek"
+import { streamText } from "ai"
+import AdvancedMCPManager from "@/lib/advanced-mcp-manager"
+
+export const maxDuration = 30
 
 export async function POST(req: Request) {
-  const { messages } = await req.json();
+  const { messages } = await req.json()
 
   try {
-    // Connect to the MCP server to get tools
-    // You can use different transport types based on your server setup
-    const mcpClient = await experimental_createMCPClient({
-      transport: {
-        type: "sse", // or other transport types like 'websocket', 'http', etc.
-        url: process.env.MCP_SERVER_URL as string,
-      },
-    });
-    // Fetch tools from the MCP server
-    const tools = await mcpClient.tools();
-    // Create the text stream with the model and fetched tools
+    const mcpManager = AdvancedMCPManager.getInstance({
+      cacheTimeout: 10 * 60 * 1000, // 10分钟缓存
+      maxRetries: 3,
+      retryDelay: 1000,
+    })
+
+    const { tools, client } = await mcpManager.getToolsAndClient()
+
     const result = streamText({
       model: deepseek("deepseek-chat"),
       messages,
       tools,
-      // Close the MCP client when the response is finished
       onFinish: async () => {
-        await mcpClient.close();
+        // 可以在这里进行健康检查
+        await mcpManager.healthCheck()
       },
-    });
+      onError: async (error) => {
+        console.error("Stream error:", error)
+        // 强制刷新缓存
+        await mcpManager.forceRefresh()
+      },
+    })
 
-    return result.toDataStreamResponse();
+    return result.toDataStreamResponse()
   } catch (error) {
-    console.error("Error in chat API route:", error);
-    return new Response(
-      JSON.stringify({ error: "Failed to process your request" }),
-      {
-        status: 500,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    console.error("Error in chat API route:", error)
+    return new Response(JSON.stringify({ error: "Failed to process your request" }), {
+      status: 500,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
   }
 }
