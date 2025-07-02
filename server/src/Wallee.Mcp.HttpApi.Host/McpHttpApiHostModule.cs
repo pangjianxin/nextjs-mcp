@@ -35,8 +35,8 @@ using Volo.Abp.UI.Navigation.Urls;
 using Volo.Abp.VirtualFileSystem;
 using Wallee.Mcp.EntityFrameworkCore;
 using Wallee.Mcp.HealthChecks;
-using Wallee.Mcp.McpServers;
 using Wallee.Mcp.MultiTenancy;
+using Wallee.Mcp.Tools;
 
 namespace Wallee.Mcp;
 
@@ -50,7 +50,8 @@ namespace Wallee.Mcp;
     typeof(McpEntityFrameworkCoreModule),
     typeof(AbpAccountWebOpenIddictModule),
     typeof(AbpSwashbuckleModule),
-    typeof(AbpAspNetCoreSerilogModule)
+    typeof(AbpAspNetCoreSerilogModule),
+    typeof(McpServersModule)
     )]
 public class McpHttpApiHostModule : AbpModule
 {
@@ -118,14 +119,6 @@ public class McpHttpApiHostModule : AbpModule
         ConfigureCors(context, configuration);
         ConfigMcpServer(context);
         ConfigureSemanticKernel(context, configuration);
-
-
-        context.Services.AddSingleton(_ =>
-        {
-            var client = new HttpClient() { BaseAddress = new Uri("https://api.weather.gov") };
-            client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("weather-tool", "1.0"));
-            return client;
-        });
     }
 
     private void ConfigureAuthentication(ServiceConfigurationContext context)
@@ -295,7 +288,7 @@ public class McpHttpApiHostModule : AbpModule
         //MCP Server
         app.UseEndpoints(it =>
         {
-            var builder = it.MapMcp();
+            var builder = it.MapMcp("/mcp");
             //builder.RequireAuthorization(policy =>
             //{
             //    // policy.RequireAuthenticatedUser();

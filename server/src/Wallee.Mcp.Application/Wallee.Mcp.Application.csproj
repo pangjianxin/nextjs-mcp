@@ -14,7 +14,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="ModelContextProtocol" Version="0.3.0-preview.1" />
     <PackageReference Include="Volo.Abp.PermissionManagement.Application" Version="9.2.1" />
     <PackageReference Include="Volo.Abp.FeatureManagement.Application" Version="9.2.1" />
     <PackageReference Include="Volo.Abp.SettingManagement.Application" Version="9.2.1" />

@@ -2,7 +2,7 @@
 using System;
 using System.ComponentModel;
 
-namespace Wallee.Mcp.McpServers;
+namespace Wallee.Mcp.Tools;
 
 [McpServerToolType]
 public class TimeTool
