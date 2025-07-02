@@ -7,7 +7,6 @@ namespace Wallee.Mcp.McpServers;
 [McpServerToolType]
 public class TimeTool
 {
-    [McpServerTool, Description("Get the current time for a city")]
-    public string GetCurrentTime(string city) =>
-        $"It is {DateTime.Now.Hour}:{DateTime.Now.Minute} in {city}.";
+    [McpServerTool, Description("获取一个城市的当前时间")]
+    public DateTimeOffset GetCurrentTime(string city) => DateTimeOffset.Now;
 }
