@@ -17,7 +17,6 @@
     <PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="9.0.0" />
     <PackageReference Include="AspNetCore.HealthChecks.UI.InMemory.Storage" Version="9.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.0" />
-    <PackageReference Include="Microsoft.SemanticKernel" Version="1.55.0" />
     <PackageReference Include="ModelContextProtocol.AspNetCore" Version="0.3.0-preview.1" />
     <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
     <PackageReference Include="Serilog.Expressions" Version="5.1.0-dev-02301" />
@@ -41,6 +40,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\aspire\Wallee.Mcp.ServiceDefaults\Wallee.Mcp.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\Wallee.Mcp.Agents\Wallee.Mcp.Agents.csproj" />
     <ProjectReference Include="..\Wallee.Mcp.Application\Wallee.Mcp.Application.csproj" />
     <ProjectReference Include="..\Wallee.Mcp.HttpApi\Wallee.Mcp.HttpApi.csproj" />
     <ProjectReference Include="..\Wallee.Mcp.EntityFrameworkCore\Wallee.Mcp.EntityFrameworkCore.csproj" />

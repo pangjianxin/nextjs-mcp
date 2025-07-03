@@ -7,14 +7,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using Microsoft.SemanticKernel;
 using OpenIddict.Server.AspNetCore;
 using OpenIddict.Validation.AspNetCore;
 using System;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using Volo.Abp;
 using Volo.Abp.Account;
 using Volo.Abp.Account.Web;
@@ -33,6 +30,7 @@ using Volo.Abp.Studio.Client.AspNetCore;
 using Volo.Abp.Swashbuckle;
 using Volo.Abp.UI.Navigation.Urls;
 using Volo.Abp.VirtualFileSystem;
+using Wallee.Mcp.Agents;
 using Wallee.Mcp.EntityFrameworkCore;
 using Wallee.Mcp.HealthChecks;
 using Wallee.Mcp.MultiTenancy;
@@ -51,7 +49,8 @@ namespace Wallee.Mcp;
     typeof(AbpAccountWebOpenIddictModule),
     typeof(AbpSwashbuckleModule),
     typeof(AbpAspNetCoreSerilogModule),
-    typeof(McpServersModule)
+    typeof(McpServersModule),
+    typeof(McpAgentsModule)
     )]
 public class McpHttpApiHostModule : AbpModule
 {
@@ -118,7 +117,6 @@ public class McpHttpApiHostModule : AbpModule
         ConfigureVirtualFileSystem(context);
         ConfigureCors(context, configuration);
         ConfigMcpServer(context);
-        ConfigureSemanticKernel(context, configuration);
     }
 
     private void ConfigureAuthentication(ServiceConfigurationContext context)
@@ -226,22 +224,7 @@ public class McpHttpApiHostModule : AbpModule
            .WithToolsFromAssembly(typeof(TimeTool).Assembly);
     }
 
-    private void ConfigureSemanticKernel(ServiceConfigurationContext context, IConfiguration configuration)
-    {
-        context.Services.AddTransient<Kernel>(serviceProvider =>
-        {
-            IKernelBuilder kernelBuilder = Kernel.CreateBuilder();
 
-            kernelBuilder.AddOpenAIChatCompletion(
-                modelId: configuration["DeepSeek:ModelId"]!,
-                endpoint: new Uri(configuration["DeepSeek:EndPoint"]!),
-                apiKey: configuration["DeepSeek:ApiKey"]!,
-                serviceId: "deep-seek"
-                );
-
-            return kernelBuilder.Build();
-        });
-    }
 
     private void ConfigureHealthChecks(ServiceConfigurationContext context)
     {
