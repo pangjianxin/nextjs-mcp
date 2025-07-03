@@ -11,8 +11,6 @@
 	<ItemGroup>
 	  <PackageReference Include="Microsoft.SemanticKernel" Version="1.59.0" />
 	  <PackageReference Include="Microsoft.SemanticKernel.Agents.Core" Version="1.59.0" />
-	  <PackageReference Include="Microsoft.SemanticKernel.Agents.OpenAI" Version="1.59.0-preview" />
-	  <PackageReference Include="Microsoft.SemanticKernel.Agents.Orchestration" Version="1.59.0-preview" />
 	</ItemGroup>
 
 	<ItemGroup>
