@@ -30,9 +30,9 @@ using Volo.Abp.Studio.Client.AspNetCore;
 using Volo.Abp.Swashbuckle;
 using Volo.Abp.UI.Navigation.Urls;
 using Volo.Abp.VirtualFileSystem;
-using Wallee.Mcp.Agents;
 using Wallee.Mcp.EntityFrameworkCore;
 using Wallee.Mcp.HealthChecks;
+using Wallee.Mcp.Mongo;
 using Wallee.Mcp.MultiTenancy;
 using Wallee.Mcp.Tools;
 
@@ -50,7 +50,8 @@ namespace Wallee.Mcp;
     typeof(AbpSwashbuckleModule),
     typeof(AbpAspNetCoreSerilogModule),
     typeof(McpServersModule),
-    typeof(McpAgentsModule)
+    typeof(McpAgentsModule),
+    typeof(McpMongoModule)
     )]
 public class McpHttpApiHostModule : AbpModule
 {

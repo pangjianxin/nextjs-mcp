@@ -11,9 +11,12 @@
 	<ItemGroup>
 	  <PackageReference Include="Microsoft.SemanticKernel" Version="1.59.0" />
 	  <PackageReference Include="Microsoft.SemanticKernel.Agents.Core" Version="1.59.0" />
+	  <PackageReference Include="Microsoft.SemanticKernel.Plugins.Memory" Version="1.59.0-alpha" />
+	  <PackageReference Include="Volo.Abp.VirtualFileSystem" Version="9.2.1" />
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\Wallee.Mcp.Application.Contracts\Wallee.Mcp.Application.Contracts.csproj" />
 		<ProjectReference Include="..\Wallee.Mcp.Domain\Wallee.Mcp.Domain.csproj" />
 	</ItemGroup>
 

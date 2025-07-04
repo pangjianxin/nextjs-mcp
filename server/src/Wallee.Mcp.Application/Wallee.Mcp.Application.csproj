@@ -9,11 +9,22 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="fonts\simhei.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Wallee.Mcp.Domain\Wallee.Mcp.Domain.csproj" />
     <ProjectReference Include="..\Wallee.Mcp.Application.Contracts\Wallee.Mcp.Application.Contracts.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.6" />
+    <PackageReference Include="MimeTypes" Version="2.5.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="QuestPDF" Version="2025.7.0" />
+    <PackageReference Include="Volo.Abp.MailKit" Version="9.2.1" />
     <PackageReference Include="Volo.Abp.PermissionManagement.Application" Version="9.2.1" />
     <PackageReference Include="Volo.Abp.FeatureManagement.Application" Version="9.2.1" />
     <PackageReference Include="Volo.Abp.SettingManagement.Application" Version="9.2.1" />

@@ -5,6 +5,8 @@ using Volo.Abp.SettingManagement;
 using Volo.Abp.FeatureManagement;
 using Volo.Abp.Identity;
 using Volo.Abp.TenantManagement;
+using Volo.Abp.BackgroundJobs;
+using Volo.Abp.BlobStoring;
 
 namespace Wallee.Mcp;
 
@@ -15,7 +17,9 @@ namespace Wallee.Mcp;
     typeof(AbpIdentityApplicationContractsModule),
     typeof(AbpAccountApplicationContractsModule),
     typeof(AbpTenantManagementApplicationContractsModule),
-    typeof(AbpPermissionManagementApplicationContractsModule)
+    typeof(AbpPermissionManagementApplicationContractsModule),
+    typeof(AbpBackgroundJobsAbstractionsModule),
+    typeof(AbpBlobStoringModule)
 )]
 public class McpApplicationContractsModule : AbpModule
 {
