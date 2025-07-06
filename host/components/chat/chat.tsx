@@ -369,7 +369,7 @@ export default function ChatPage() {
               max={50}
               step={5}
               value={[contextSettings.maxMessages]}
-              onValueChange={(value) =>
+              onValueChange={(value: any[]) =>
                 setContextSettings((prev) => ({
                   ...prev,
                   maxMessages: value[0],
@@ -392,7 +392,7 @@ export default function ChatPage() {
             <Switch
               id="keepSystem"
               checked={contextSettings.keepSystemMessages}
-              onCheckedChange={(checked) =>
+              onCheckedChange={(checked: any) =>
                 setContextSettings((prev) => ({
                   ...prev,
                   keepSystemMessages: checked,
@@ -411,7 +411,7 @@ export default function ChatPage() {
             <Switch
               id="includeSummary"
               checked={contextSettings.includeSummary}
-              onCheckedChange={(checked) =>
+              onCheckedChange={(checked: any) =>
                 setContextSettings((prev) => ({
                   ...prev,
                   includeSummary: checked,

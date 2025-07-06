@@ -1,7 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<Import Project="..\..\common.props" />
-
+	
+	<PropertyGroup>
+		<NoWarn>$(NoWarn);CA2007;IDE1006;SKEXP0001;SKEXP0110;OPENAI001;SKEXP0130</NoWarn>
+	</PropertyGroup>
+	
 	<PropertyGroup>
 		<TargetFramework>net9.0</TargetFramework>
 		<Nullable>enable</Nullable>
@@ -12,6 +16,7 @@
 	  <PackageReference Include="Microsoft.SemanticKernel" Version="1.59.0" />
 	  <PackageReference Include="Microsoft.SemanticKernel.Agents.Core" Version="1.59.0" />
 	  <PackageReference Include="Microsoft.SemanticKernel.Plugins.Memory" Version="1.59.0-alpha" />
+	  <PackageReference Include="Volo.Abp.AspNetCore.SignalR" Version="9.2.1" />
 	  <PackageReference Include="Volo.Abp.VirtualFileSystem" Version="9.2.1" />
 	</ItemGroup>
 

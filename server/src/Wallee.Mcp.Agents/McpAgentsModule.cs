@@ -5,6 +5,7 @@ using Microsoft.SemanticKernel.Agents;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using System;
+using Volo.Abp.AspNetCore.SignalR;
 using Volo.Abp.Modularity;
 using Wallee.Mcp.Plugins;
 
@@ -12,7 +13,8 @@ namespace Wallee.Mcp
 {
     [DependsOn(
         typeof(McpDomainModule),
-        typeof(McpApplicationContractsModule)
+        typeof(McpApplicationContractsModule),
+        typeof(AbpAspNetCoreSignalRModule)
         )]
     public class McpAgentsModule : AbpModule
     {
@@ -25,63 +27,32 @@ namespace Wallee.Mcp
 
         private void ConfigureSemanticKernel(ServiceConfigurationContext context, IConfiguration configuration)
         {
-            context.Services.AddKernel().AddOpenAIChatCompletion(
+            context.Services.AddKernel()
+                .AddOpenAIChatCompletion(
                     modelId: configuration["DeepSeek:ModelId"]!,
                     endpoint: new Uri(configuration["DeepSeek:EndPoint"]!),
                     apiKey: configuration["DeepSeek:ApiKey"]!,
-                    serviceId: "deepseek-chat"
-            );
+                    serviceId: "deepseek-chat");
 
-            context.Services.AddKeyedScoped("enterprise-document-agent", (sp, key) =>
+            context.Services.AddKeyedTransient("memory-test-agent", (sp, key) =>
             {
                 var agentKernel = sp.GetRequiredService<Kernel>().Clone();
 
-                agentKernel.Plugins.AddFromType<CorporateInfoPlugin>("corporatePlugin");
+                agentKernel.Plugins.AddFromType<MemoryTestPlugin>("memoryTestPlugin");
 
                 var agent = new ChatCompletionAgent()
                 {
-                    Name = "CorporateAgent",
+                    Name = "ChatAgent",
                     Instructions = """
-                    You are an agent designed to query and retrieve information from a single GitHub repository in a read-only manner.
-                    You are also able to access the profile of the active user.
-
-                    Use the current date and time to provide up-to-date details or time-sensitive responses.
-
-                    The repository you are querying is a public repository with the following name: {{$repository}}
-
-                    The current date and time is: {{$now}}. 
-                    """,
-                    Kernel = agentKernel,
-
-                    Arguments = new KernelArguments(new OpenAIPromptExecutionSettings()
-                    {
-                        ServiceId = "deepseek-chat",
-                        FunctionChoiceBehavior = FunctionChoiceBehavior.Auto()
-                    })
-                };
-                return agent;
-            });
-
-
-            context.Services.AddKeyedScoped("enterprise-document-agent", (sp, key) =>
-            {
-
-                var agentKernel = sp.GetRequiredService<Kernel>().Clone();
-
-                agentKernel.Plugins.AddFromType<CorporateInfoPlugin>("corporatePlugin");
-
-                var agent = new ChatCompletionAgent()
-                {
-                    Name = "CorporateAgent",
-                    Instructions = """
-                    You are an agent designed to query and retrieve information from a single GitHub repository in a read-only manner.
-                    You are also able to access the profile of the active user.
-
-                    Use the current date and time to provide up-to-date details or time-sensitive responses.
-
-                    The repository you are querying is a public repository with the following name: {{$repository}}
-
-                    The current date and time is: {{$now}}. 
+                    请记住：我的工号是 12345。
+                    #（调用 memoryTestPlugin.Remember，key=工号，value=12345）
+                    如果你收到一个姓名和工号的请求，请先检查 memoryTestPlugin 是否已缓存该姓名对应的工号。
+                    #（调用 memoryTestPlugin.Recall，key=姓名）
+                    如果缓存中存在该姓名的工号，直接返回该工号。
+                    如果缓存中没有该姓名的工号，请调用 memoryTestPlugin.Remember 方法将该姓名和工号添加到缓存中。
+                    #（调用 memoryTestPlugin.Remember，key=姓名，value=工号）
+                    然后返回该工号。
+                    #（调用 memoryTestPlugin.Recall，key=工号）
                     """,
                     Kernel = agentKernel,
 
@@ -91,7 +62,7 @@ namespace Wallee.Mcp
                         FunctionChoiceBehavior = FunctionChoiceBehavior.Auto()
                     }),
 
-                    //HistoryReducer = new ChatHistoryTruncationReducer(5)
+                    HistoryReducer = new ChatHistoryTruncationReducer(3, 3)
                 };
                 return agent;
             });

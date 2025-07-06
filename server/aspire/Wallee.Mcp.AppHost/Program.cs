@@ -1,3 +1,7 @@
+using System.Text;
+
+Console.OutputEncoding = Encoding.UTF8;
+
 var builder = DistributedApplication.CreateBuilder(args);
 
 var postgres = builder.AddPostgres("postgres", builder.AddParameter("pg-user", false), builder.AddParameter("pg-passwd", secret: true))
