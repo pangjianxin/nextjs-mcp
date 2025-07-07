@@ -31,6 +31,7 @@ using Volo.Abp.Swashbuckle;
 using Volo.Abp.UI.Navigation.Urls;
 using Volo.Abp.VirtualFileSystem;
 using Wallee.Mcp.EntityFrameworkCore;
+using Wallee.Mcp.Extensions;
 using Wallee.Mcp.HealthChecks;
 using Wallee.Mcp.Mongo;
 using Wallee.Mcp.MultiTenancy;
@@ -182,17 +183,24 @@ public class McpHttpApiHostModule : AbpModule
 
     private static void ConfigureSwagger(ServiceConfigurationContext context, IConfiguration configuration)
     {
-        context.Services.AddAbpSwaggerGenWithOidc(
-            configuration["AuthServer:Authority"]!,
-            ["Mcp"],
-            [AbpSwaggerOidcFlows.AuthorizationCode],
-            null,
-            options =>
-            {
-                options.SwaggerDoc("v1", new OpenApiInfo { Title = "Mcp API", Version = "v1" });
-                options.DocInclusionPredicate((docName, description) => true);
-                options.CustomSchemaIds(type => type.FullName);
-            });
+        SwaggerConfigurationHelper.ConfigureWithOidc(
+         context: context,
+         authority: configuration["AuthServer:Authority"]!,
+         scopes: ["Mcp"],
+         flows: [AbpSwaggerOidcFlows.AuthorizationCode],
+         apiTitle: "Mcp service api");
+
+        //context.Services.AddAbpSwaggerGenWithOidc(
+        //    configuration["AuthServer:Authority"]!,
+        //    ["Mcp"],
+        //    [AbpSwaggerOidcFlows.AuthorizationCode],
+        //    null,
+        //    options =>
+        //    {
+        //        options.SwaggerDoc("v1", new OpenApiInfo { Title = "Mcp API", Version = "v1" });
+        //        options.DocInclusionPredicate((docName, description) => true);
+        //        options.CustomSchemaIds(type => type.FullName);
+        //    });
     }
 
     private void ConfigureCors(ServiceConfigurationContext context, IConfiguration configuration)

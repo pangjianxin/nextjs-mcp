@@ -37,6 +37,7 @@ namespace Wallee.Mcp
             context.Services.AddKeyedTransient("memory-test-agent", (sp, key) =>
             {
                 var agentKernel = sp.GetRequiredService<Kernel>().Clone();
+                var chatService = sp.GetRequiredKeyedService<IChatCompletionService>("deepseek-chat");
 
                 agentKernel.Plugins.AddFromType<MemoryTestPlugin>("memoryTestPlugin");
 
@@ -62,7 +63,8 @@ namespace Wallee.Mcp
                         FunctionChoiceBehavior = FunctionChoiceBehavior.Auto()
                     }),
 
-                    HistoryReducer = new ChatHistoryTruncationReducer(3, 3)
+                    //HistoryReducer = new ChatHistoryTruncationReducer(3, 3)
+                    HistoryReducer = new ChatHistorySummarizationReducer(chatService, 3, 3)
                 };
                 return agent;
             });

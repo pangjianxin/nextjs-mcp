@@ -21,7 +21,7 @@ namespace Wallee.Mcp.SignalR
     {
         private const string ChatHistoryKey = "ChatHistoryAgentThread";
         private readonly IChatClient _chatClient = chatClient.AsChatClient();
-
+       
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
             if (exception != null)
@@ -61,7 +61,8 @@ namespace Wallee.Mcp.SignalR
                 Context.Items[ChatHistoryKey] = chatHistoryAgentThread;
             }
 
-            // Fix for CS8602: Ensure HistoryReducer is not null before calling ReduceAsync  
+            // Fix for CS8602: Ensure HistoryReducer is not null before calling ReduceAsync
+            
             if (chatAgent.HistoryReducer != null)
             {
                 await chatAgent.ReduceAsync(chatHistoryAgentThread.ChatHistory, cancellationToken: cancellationToken);
@@ -71,14 +72,14 @@ namespace Wallee.Mcp.SignalR
 
             await foreach (var response in chatAgent.InvokeStreamingAsync(message, chatHistoryAgentThread, cancellationToken: cancellationToken))
             {
-                var serializedData = System.Text.Json.JsonSerializer.Serialize(
-                    response,
-                    new System.Text.Json.JsonSerializerOptions
-                    {
-                        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-                    }
-                );
-                Logger.LogInformation(serializedData);
+                //var serializedData = System.Text.Json.JsonSerializer.Serialize(
+                //    response,
+                //    new System.Text.Json.JsonSerializerOptions
+                //    {
+                //        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                //    }
+                //);
+                //Logger.LogInformation(serializedData);
                 yield return response;
             }
         }
