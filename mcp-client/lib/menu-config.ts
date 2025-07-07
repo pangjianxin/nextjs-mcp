@@ -13,19 +13,19 @@ import {
 
 export const teams = [
   {
-    name: "中国稀土网-管理端",
+    name: "企智顾问-管理端",
     logo: GalleryVerticalEnd,
-    plan: "China Rare Earth",
+    plan: "Enterprise plan",
   },
   {
-    name: "中国稀土网-PC端",
+    name: "企智顾问-PC端",
     logo: AudioWaveform,
-    plan: "China Rare Earth",
+    plan: "Enterprise plan",
   },
   {
-    name: "中国稀土网-移动端",
+    name: "企智顾问-移动端",
     logo: Command,
-    plan: "China Rare Earth",
+    plan: "Enterprise plan",
   },
 ];
 export const navMain = [

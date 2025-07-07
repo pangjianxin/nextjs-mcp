@@ -34,7 +34,7 @@ export const NavTop: FC<TopNavProps> = ({ sidebarTrigger }) => {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
-      className="sticky top-0 w-full z-50 h-[64px] bg-white dark:bg-black border-b border-gray-200 dark:border-gray-800"
+      className="sticky top-0 w-full z-50 h-[64px] bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white"
     >
       <div className="flex items-center justify-between h-full px-4 md:px-6">
         {/* 左侧：Logo 和 Sidebar Trigger */}

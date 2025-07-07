@@ -123,8 +123,8 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="flex items-center justify-center container mx-auto h-full p-4 bg-gray-50">
-      <Card className="w-full max-w-2xl h-full flex flex-col">
+    <div className="flex items-center justify-center w-4xl mx-auto h-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+      <Card className="w-full h-full flex flex-col">
         <CardHeader className="border-b">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">

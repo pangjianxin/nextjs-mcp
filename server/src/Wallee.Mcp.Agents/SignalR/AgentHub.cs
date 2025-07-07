@@ -60,8 +60,6 @@ namespace Wallee.Mcp.SignalR
                 chatHistoryAgentThread.AIContextProviders.Add(new WhiteboardProvider(_chatClient));
                 Context.Items[ChatHistoryKey] = chatHistoryAgentThread;
             }
-
-            // Fix for CS8602: Ensure HistoryReducer is not null before calling ReduceAsync
             
             if (chatAgent.HistoryReducer != null)
             {

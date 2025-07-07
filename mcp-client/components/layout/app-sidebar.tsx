@@ -13,7 +13,7 @@ import {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader>
+      <SidebarHeader className="bg-gradient-to-tr from-slate-900 via-blue-900 to-slate-900 text-white">
         <TeamSwitcher />
       </SidebarHeader>
       <SidebarContent className="bg-transparent">
