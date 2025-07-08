@@ -26,23 +26,6 @@ export const useRoles = ({
   filter?: string | undefined;
   sorting?: string | undefined;
 }) => {
-  // return useQuery({
-  //   queryKey: [QueryNames.GetRoles, pageIndex, pageSize, filter, sorting],
-  //   queryFn: async () => {
-  //     let skip = 0;
-  //     if (pageIndex > 0) {
-  //       skip = pageIndex * pageSize;
-  //     }
-  //     const data = await roleGetList({
-  //       maxResultCount: pageSize,
-  //       skipCount: skip,
-  //       filter: filter,
-  //       sorting: sorting,
-  //     });
-  //     return data;
-  //   },
-  // });
-
   return useQuery({
     queryKey: [roleGetListQueryKey(), pageIndex, pageSize, filter, sorting],
     queryFn: async () => {

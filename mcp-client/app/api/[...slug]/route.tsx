@@ -10,7 +10,9 @@ const EXTERNAL_API_URL = process.env.NEXT_PUBLIC_API_URL;
  * @returns {Promise<Response>} - The response from the external API or an error response.
  */
 export async function GET(request: NextRequest): Promise<Response> {
+  console.log("????get");
   const session = await auth();
+  console.log(session);
   const path = request.nextUrl.pathname;
   try {
     return await fetch(`${EXTERNAL_API_URL}${path}${request.nextUrl.search}`, {
@@ -33,6 +35,7 @@ export async function GET(request: NextRequest): Promise<Response> {
  */
 export async function POST(request: NextRequest): Promise<Response> {
   const session = await auth();
+  console.log("????post");
   const path = request.nextUrl.pathname;
   console.log(`POST: ${EXTERNAL_API_URL}${path}${request.nextUrl.search}`);
   const contentType = request.headers.get("Content-Type") || "application/json";

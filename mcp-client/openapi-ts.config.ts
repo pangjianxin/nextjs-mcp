@@ -8,19 +8,20 @@ export default defineConfig({
     lint: "eslint",
     path: "./openapi",
   },
-  parser: {
-    transforms: {
-      readWrite: {
-        enabled: false,
-      },
-    },
-  },
+  // parser: {
+  //   transforms: {
+  //     readWrite: {
+  //       enabled: false,
+  //     },
+  //   },
+  // },
   plugins: [
     ...defaultPlugins,
     { name: "@tanstack/react-query" },
     {
       name: "@hey-api/typescript",
       enums: "typescript",
+      readOnlyWriteOnlyBehavior: "off",
     },
     { name: "@hey-api/client-next", runtimeConfigPath: "./hey-api.ts" },
   ],

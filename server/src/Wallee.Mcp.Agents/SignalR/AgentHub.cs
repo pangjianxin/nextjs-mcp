@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.AI;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
@@ -15,13 +16,14 @@ using Volo.Abp.AspNetCore.SignalR;
 namespace Wallee.Mcp.SignalR
 {
     [HubRoute("/signalr-hubs/ai/agent")]
+    [Authorize]
     public class AgentHub(
         [FromKeyedServices("memory-test-agent")] ChatCompletionAgent chatAgent,
         [FromKeyedServices("deepseek-chat")] IChatCompletionService chatClient) : AbpHub
     {
         private const string ChatHistoryKey = "ChatHistoryAgentThread";
         private readonly IChatClient _chatClient = chatClient.AsChatClient();
-       
+
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
             if (exception != null)
@@ -47,11 +49,9 @@ namespace Wallee.Mcp.SignalR
         }
 
         public async IAsyncEnumerable<AgentResponseItem<StreamingChatMessageContent>> Chat(
-           string input,
-           [EnumeratorCancellation] CancellationToken cancellationToken)
+            string input,
+            [EnumeratorCancellation] CancellationToken cancellationToken)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
             // 获取当前连接的 ChatHistoryAgentThread  
             if (!Context.Items.TryGetValue(ChatHistoryKey, out var threadObj) || threadObj is not ChatHistoryAgentThread chatHistoryAgentThread)
             {
@@ -60,25 +60,20 @@ namespace Wallee.Mcp.SignalR
                 chatHistoryAgentThread.AIContextProviders.Add(new WhiteboardProvider(_chatClient));
                 Context.Items[ChatHistoryKey] = chatHistoryAgentThread;
             }
-            
-            if (chatAgent.HistoryReducer != null)
-            {
-                await chatAgent.ReduceAsync(chatHistoryAgentThread.ChatHistory, cancellationToken: cancellationToken);
-            }
 
             var message = new ChatMessageContent(AuthorRole.User, input);
 
+            // 先发送消息流
             await foreach (var response in chatAgent.InvokeStreamingAsync(message, chatHistoryAgentThread, cancellationToken: cancellationToken))
             {
-                //var serializedData = System.Text.Json.JsonSerializer.Serialize(
-                //    response,
-                //    new System.Text.Json.JsonSerializerOptions
-                //    {
-                //        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-                //    }
-                //);
-                //Logger.LogInformation(serializedData);
+                cancellationToken.ThrowIfCancellationRequested();
                 yield return response;
+            }
+
+            // 所有消息发送完成后再进行历史归约
+            if (chatAgent.HistoryReducer != null)
+            {
+                await chatAgent.ReduceAsync(chatHistoryAgentThread.ChatHistory, cancellationToken: cancellationToken);
             }
         }
     }

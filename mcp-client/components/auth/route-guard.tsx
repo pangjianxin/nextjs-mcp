@@ -30,7 +30,7 @@ export function RouteGuard({
 
   useEffect(() => {
     if (!isLoading && !user) {
-      router.push("/login")
+      router.push("/account/login")
       return
     }
   }, [user, isLoading, router])

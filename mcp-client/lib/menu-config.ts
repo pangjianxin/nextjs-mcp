@@ -6,25 +6,13 @@ import {
   GalleryVerticalEnd,
   LayoutDashboard,
   Settings2,
-  BotIcon,
-  BotMessageSquare,
   UserCog,
 } from "lucide-react";
 
 export const teams = [
   {
-    name: "企智顾问-管理端",
+    name: "企智顾问管理端",
     logo: GalleryVerticalEnd,
-    plan: "Enterprise plan",
-  },
-  {
-    name: "企智顾问-PC端",
-    logo: AudioWaveform,
-    plan: "Enterprise plan",
-  },
-  {
-    name: "企智顾问-移动端",
-    logo: Command,
     plan: "Enterprise plan",
   },
 ];
@@ -45,7 +33,7 @@ export const navMain = [
     title: "智能应用",
     url: "#",
     icon: Bot,
-    isActive: false,
+    isActive: true,
     items: [
       {
         title: "智能对话",
