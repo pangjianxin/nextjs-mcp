@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Volo.Abp.BackgroundJobs;
+using Volo.Abp.Json;
 using Volo.Abp.Uow;
 using Volo.Abp.Users;
 using Wallee.Mcp.CorporateInfos;
@@ -18,6 +19,7 @@ namespace Wallee.Mcp.Plugins
     public class CorporateInfoPlugin
     {
         private readonly ITianYanChaCorporateInfoFetcher _tianYanChaCorporateInfoFetcher;
+        private readonly IJsonSerializer _jsonSerializer;
         private readonly IBackgroundJobManager _backgroundJobManager;
         private readonly ICorporateInfoRepository _corporateInfoRepository;
         private readonly ICurrentUser _currentUser;
@@ -28,46 +30,66 @@ namespace Wallee.Mcp.Plugins
             ICorporateInfoRepository corporateInfoRepository,
             ICurrentUser currentUser,
             IUnitOfWorkManager unitOfWorkManager,
-            ITianYanChaCorporateInfoFetcher tianYanChaCorporateInfoFetcher)
+            ITianYanChaCorporateInfoFetcher tianYanChaCorporateInfoFetcher,
+            IJsonSerializer jsonSerializer)
         {
             _backgroundJobManager = backgroundJobManager;
             _corporateInfoRepository = corporateInfoRepository;
             _currentUser = currentUser;
             _unitOfWorkManager = unitOfWorkManager;
             _tianYanChaCorporateInfoFetcher = tianYanChaCorporateInfoFetcher;
+            _jsonSerializer = jsonSerializer;
         }
 
+        //[KernelFunction]
+        //[Description("通过关键字搜索企业信息")]
+        //[return: Description("返回搜索到的企业的统一社会信用代码证号")]
+        //public async Task<string?> SearchAsync(
+        //   [Description("企业信息搜索关键字")] string companyName)
+        //{
+        //    var existed = await _corporateInfoRepository.FindAsync(it => it.Name.Contains(companyName) || it.CreditCode.Contains(companyName));
+
+        //    if (existed != default)
+        //    {
+        //        return existed.CreditCode;
+        //    }
+        //    else
+        //    {
+        //        var corporateInfo = await _tianYanChaCorporateInfoFetcher.SearchCorporateInfoAsync(companyName, pageSize: 1);
+
+        //        if (corporateInfo != default && corporateInfo.Result.Total > 0)
+        //        {
+        //            return corporateInfo.Result.Items.First().CreditCode;
+        //        }
+        //    }
+
+        //    return null;
+        //}
+
         [KernelFunction]
-        [Description("通过关键字搜索企业信息")]
-        [return: Description("返回搜索到的企业的统一社会信用代码证号")]
-        public async Task<string?> SearchAsync(
-           [Description("企业信息搜索关键字")] string companyName)
+        [Description("通过关键字来查找企业信息")]
+        [return: Description("将查找到的结果或异常使用json序列化之后返回")]
+        public async Task<string> SearchCorporateInfo([Description("关键字")] string keyWord)
         {
-            var existed = await _corporateInfoRepository.FindAsync(it => it.Name.Contains(companyName) || it.CreditCode.Contains(companyName));
-
-            if (existed != default)
+            try
             {
-                return existed.CreditCode;
+                var corporate = await _tianYanChaCorporateInfoFetcher.FetchCorporateInfoAsync(keyWord);
+
+                return _jsonSerializer.Serialize(corporate);
+
             }
-            else
+            catch (ArgumentException e)
             {
-                var corporateInfo = await _tianYanChaCorporateInfoFetcher.SearchCorporateInfoAsync(companyName, pageSize: 1);
-
-                if (corporateInfo != default && corporateInfo.Result.Total > 0)
-                {
-                    return corporateInfo.Result.Items.First().CreditCode;
-                }
+                return _jsonSerializer.Serialize(e);
             }
-
-            return null;
         }
 
         [KernelFunction]
         [Description("给指定的收件人发送企业信息")]
         [return: Description("返回发送结果")]
         public async Task<string> SendAsync(
-           [Description("收件人,发送给谁")] string email,
-           [Description("统一社会信用代码证号或简称代码证号")] string creditCode)
+        [Description("收件人,发送给谁")] string email,
+        [Description("统一社会信用代码证号或简称代码证号")] string creditCode)
         {
 
             if (!CheckEmail(email))
@@ -86,7 +108,9 @@ namespace Wallee.Mcp.Plugins
                 CorporateReportType = CorporateReportType.企业基础信息,
                 Email = email
             };
+
             var corporateInfo = await _corporateInfoRepository.FindAsync(it => it.CreditCode == creditCode);
+
             using var uow = _unitOfWorkManager.Begin();
             if (corporateInfo == default)
             {

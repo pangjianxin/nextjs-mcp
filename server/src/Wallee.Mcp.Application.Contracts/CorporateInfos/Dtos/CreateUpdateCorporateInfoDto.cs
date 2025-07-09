@@ -1,14 +1,10 @@
 using System;
 using System.Collections.Generic;
-using Volo.Abp.Application.Dtos;
 
 namespace Wallee.Mcp.CorporateInfos.Dtos;
 
-/// <summary>
-/// 企业信息
-/// </summary>
 [Serializable]
-public class CorporateInfoDto : AuditedEntityDto<Guid>
+public class CreateUpdateCorporateInfoDto
 {
     /// <summary>
     /// 企业ID

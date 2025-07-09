@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.OpenApi.Models;
 using OpenIddict.Server.AspNetCore;
 using OpenIddict.Validation.AspNetCore;
 using System;
@@ -33,7 +32,6 @@ using Volo.Abp.VirtualFileSystem;
 using Wallee.Mcp.EntityFrameworkCore;
 using Wallee.Mcp.Extensions;
 using Wallee.Mcp.HealthChecks;
-using Wallee.Mcp.Mongo;
 using Wallee.Mcp.MultiTenancy;
 using Wallee.Mcp.Tools;
 
@@ -51,8 +49,7 @@ namespace Wallee.Mcp;
     typeof(AbpSwashbuckleModule),
     typeof(AbpAspNetCoreSerilogModule),
     typeof(McpServersModule),
-    typeof(McpAgentsModule),
-    typeof(McpMongoModule)
+    typeof(McpAgentsModule)
     )]
 public class McpHttpApiHostModule : AbpModule
 {

@@ -216,17 +216,17 @@ namespace Wallee.Mcp.Documents
 
                 col.ComposeBaseInfo("一、基础信息", titleStyle, tHeaderStyle, tColStyle, _model);
 
-                col.ComposeStaffs("二、主要成员", titleStyle, tHeaderStyle, tColStyle, _model.Staffs);
+                //col.ComposeStaffs("二、主要成员", titleStyle, tHeaderStyle, tColStyle, _model.Staffs);
 
-                col.ComposeChangeInfos("三、变更记录", titleStyle, tHeaderStyle, tColStyle, _model.ChangeInfos);
+                //col.ComposeChangeInfos("三、变更记录", titleStyle, tHeaderStyle, tColStyle, _model.ChangeInfos);
 
-                col.ComposeAdministrativeLicense("四、行政许可", titleStyle, tHeaderStyle, tColStyle, _model.AdministrativeLicenses);
+                //col.ComposeAdministrativeLicense("四、行政许可", titleStyle, tHeaderStyle, tColStyle, _model.AdministrativeLicenses);
 
-                col.ComposeShareholder("五、股东信息", titleStyle, tHeaderStyle, tColStyle, _model.Shareholders);
+                //col.ComposeShareholder("五、股东信息", titleStyle, tHeaderStyle, tColStyle, _model.Shareholders);
 
-                col.ComposeInvestments("六、对外投资", titleStyle, tHeaderStyle, tColStyle, _model.Investments);
+                //col.ComposeInvestments("六、对外投资", titleStyle, tHeaderStyle, tColStyle, _model.Investments);
 
-                col.ComposeBranches("七、分支机构", titleStyle, tHeaderStyle, tColStyle, _model.Branches);
+                //col.ComposeBranches("七、分支机构", titleStyle, tHeaderStyle, tColStyle, _model.Branches);
             });
         }
         private void ComposeFooter(IContainer container)

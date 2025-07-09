@@ -51,234 +51,234 @@ namespace Wallee.Mcp.Documents.Extensions
                 table.Cell().Row(12).Column(2).Element(BlockContent).Text(corporateInfo.RegInstitute).Style(tColStyle);
                 table.Cell().Row(13).Column(2).Element(BlockContent).Text($"{(corporateInfo.FromTime.HasValue ? corporateInfo.FromTime.Value.ToString("yyyy-MM-dd") : "暂无")}至{(corporateInfo.ToTime.HasValue ? corporateInfo.ToTime.Value.ToString("yyyy-MM-dd") : "暂无")}").Style(tColStyle);
                 table.Cell().Row(14).Column(2).Element(BlockContent).Text(corporateInfo.WebsiteList ?? "暂无").Style(tColStyle);
-                table.Cell().Row(15).Column(2).Element(BlockContent).Text(corporateInfo.Email ?? "暂无").Style(tColStyle);
+                table.Cell().Row(15).Column(2).Element(BlockContent).Text(corporateInfo.EmailList?.JoinAsString(",") ?? "暂无").Style(tColStyle);
                 table.Cell().Row(16).Column(2).Element(BlockContent).Text(corporateInfo.BusinessScope).Style(tColStyle);
 
             });
         }
-        public static void ComposeStaffs(this ColumnDescriptor col, string title, TextStyle titleStyle, TextStyle tHeaderStyle, TextStyle tColStyle, List<Staff>? staffs)
-        {
-            col.Item().Text(title).Style(titleStyle);
+        //public static void ComposeStaffs(this ColumnDescriptor col, string title, TextStyle titleStyle, TextStyle tHeaderStyle, TextStyle tColStyle, List<Staff>? staffs)
+        //{
+        //    col.Item().Text(title).Style(titleStyle);
 
-            col.Item().Border(1).Table(table =>
-            {
-                table.ColumnsDefinition(col =>
-                {
-                    col.RelativeColumn(1);
-                    col.RelativeColumn(3);
-                    col.RelativeColumn(8);
-                });
-                //列名
-                table.Cell().Row(1).Column(1).Element(BlockHeader).Text("序号").Style(tHeaderStyle);
-                table.Cell().Row(1).Column(2).Element(BlockHeader).Text("名称").Style(tHeaderStyle);
-                table.Cell().Row(1).Column(3).Element(BlockHeader).Text("职位").Style(tHeaderStyle);
-                uint rowIndex = 1;
-                if (staffs != null && staffs.Count > 0)
-                {
-                    foreach (var staff in staffs)
-                    {
-                        uint colIndex = 0;
-                        ++rowIndex;
-                        table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text($"{rowIndex - 1}").Style(tColStyle);
-                        table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text(staff.Name).Style(tColStyle);
-                        table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text(staff.TypeJoin != default ? staff.TypeJoin.JoinAsString(",") : "暂无").Style(tColStyle);
-                    }
-                }
-            });
-        }
+        //    col.Item().Border(1).Table(table =>
+        //    {
+        //        table.ColumnsDefinition(col =>
+        //        {
+        //            col.RelativeColumn(1);
+        //            col.RelativeColumn(3);
+        //            col.RelativeColumn(8);
+        //        });
+        //        //列名
+        //        table.Cell().Row(1).Column(1).Element(BlockHeader).Text("序号").Style(tHeaderStyle);
+        //        table.Cell().Row(1).Column(2).Element(BlockHeader).Text("名称").Style(tHeaderStyle);
+        //        table.Cell().Row(1).Column(3).Element(BlockHeader).Text("职位").Style(tHeaderStyle);
+        //        uint rowIndex = 1;
+        //        if (staffs != null && staffs.Count > 0)
+        //        {
+        //            foreach (var staff in staffs)
+        //            {
+        //                uint colIndex = 0;
+        //                ++rowIndex;
+        //                table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text($"{rowIndex - 1}").Style(tColStyle);
+        //                table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text(staff.Name).Style(tColStyle);
+        //                table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text(staff.TypeJoin != default ? staff.TypeJoin.JoinAsString(",") : "暂无").Style(tColStyle);
+        //            }
+        //        }
+        //    });
+        //}
 
-        public static void ComposeChangeInfos(this ColumnDescriptor col, string title, TextStyle titleStyle, TextStyle tHeaderStyle, TextStyle tColStyle, List<ChangeInfo>? changeInfos)
-        {
-            col.Item().Text(title).Style(titleStyle);
+        //public static void ComposeChangeInfos(this ColumnDescriptor col, string title, TextStyle titleStyle, TextStyle tHeaderStyle, TextStyle tColStyle, List<ChangeInfo>? changeInfos)
+        //{
+        //    col.Item().Text(title).Style(titleStyle);
 
-            col.Item().Border(1).Table(table =>
-            {
-                table.ColumnsDefinition(col =>
-                {
-                    col.RelativeColumn(1);
-                    col.RelativeColumn(2);
-                    col.RelativeColumn(3);
-                    col.RelativeColumn(3);
-                    col.RelativeColumn(3);
-                });
-                //列名
-                table.Cell().Row(1).Column(1).Element(BlockHeader).Text("序号").Style(tHeaderStyle);
-                table.Cell().Row(1).Column(2).Element(BlockHeader).Text("变更时间").Style(tHeaderStyle);
-                table.Cell().Row(1).Column(3).Element(BlockHeader).Text("变更事项").Style(tHeaderStyle);
-                table.Cell().Row(1).Column(4).Element(BlockHeader).Text("变更前").Style(tHeaderStyle);
-                table.Cell().Row(1).Column(5).Element(BlockHeader).Text("变更后").Style(tHeaderStyle);
+        //    col.Item().Border(1).Table(table =>
+        //    {
+        //        table.ColumnsDefinition(col =>
+        //        {
+        //            col.RelativeColumn(1);
+        //            col.RelativeColumn(2);
+        //            col.RelativeColumn(3);
+        //            col.RelativeColumn(3);
+        //            col.RelativeColumn(3);
+        //        });
+        //        //列名
+        //        table.Cell().Row(1).Column(1).Element(BlockHeader).Text("序号").Style(tHeaderStyle);
+        //        table.Cell().Row(1).Column(2).Element(BlockHeader).Text("变更时间").Style(tHeaderStyle);
+        //        table.Cell().Row(1).Column(3).Element(BlockHeader).Text("变更事项").Style(tHeaderStyle);
+        //        table.Cell().Row(1).Column(4).Element(BlockHeader).Text("变更前").Style(tHeaderStyle);
+        //        table.Cell().Row(1).Column(5).Element(BlockHeader).Text("变更后").Style(tHeaderStyle);
 
-                if (changeInfos != null && changeInfos.Count > 0)
-                {
-                    uint rowIndex = 1;
-                    foreach (var changeInfo in changeInfos)
-                    {
-                        uint colIndex = 0;
-                        ++rowIndex;
-                        table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text($"{rowIndex - 1}").Style(tColStyle);
-                        table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text(changeInfo.ChangeTime.HasValue ? changeInfo.ChangeTime.Value.ToString("yyyy-MM-dd") : "暂无").Style(tColStyle);
-                        table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text(changeInfo.ChangeItem).Style(tColStyle);
-                        table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text(changeInfo.ContentBefore).Style(tColStyle);
-                        table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text(changeInfo.ContentAfter).Style(tColStyle);
-                    }
-                }
-            });
-        }
+        //        if (changeInfos != null && changeInfos.Count > 0)
+        //        {
+        //            uint rowIndex = 1;
+        //            foreach (var changeInfo in changeInfos)
+        //            {
+        //                uint colIndex = 0;
+        //                ++rowIndex;
+        //                table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text($"{rowIndex - 1}").Style(tColStyle);
+        //                table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text(changeInfo.ChangeTime.HasValue ? changeInfo.ChangeTime.Value.ToString("yyyy-MM-dd") : "暂无").Style(tColStyle);
+        //                table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text(changeInfo.ChangeItem).Style(tColStyle);
+        //                table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text(changeInfo.ContentBefore).Style(tColStyle);
+        //                table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text(changeInfo.ContentAfter).Style(tColStyle);
+        //            }
+        //        }
+        //    });
+        //}
 
-        public static void ComposeAdministrativeLicense(this ColumnDescriptor col, string title, TextStyle titleStyle, TextStyle tHeaderStyle, TextStyle tColStyle, List<AdministrativeLicense>? administrativeLicenses)
-        {
-            col.Item().Text(title).Style(titleStyle);
+        //public static void ComposeAdministrativeLicense(this ColumnDescriptor col, string title, TextStyle titleStyle, TextStyle tHeaderStyle, TextStyle tColStyle, List<AdministrativeLicense>? administrativeLicenses)
+        //{
+        //    col.Item().Text(title).Style(titleStyle);
 
-            col.Item().Border(1).Table(table =>
-            {
-                table.ColumnsDefinition(col =>
-                {
-                    col.RelativeColumn(1);
-                    col.RelativeColumn(2);
-                    col.RelativeColumn(4);
-                    col.RelativeColumn(5);
-                });
-                //列名
-                table.Cell().Row(1).Column(1).Element(BlockHeader).Text("序号").Style(tHeaderStyle);
-                table.Cell().Row(1).Column(2).Element(BlockHeader).Text("许可文件编号/文书号").Style(tHeaderStyle);
-                table.Cell().Row(1).Column(3).Element(BlockHeader).Text("决定许可机关").Style(tHeaderStyle);
-                table.Cell().Row(1).Column(4).Element(BlockHeader).Text("许可内容").Style(tHeaderStyle);
+        //    col.Item().Border(1).Table(table =>
+        //    {
+        //        table.ColumnsDefinition(col =>
+        //        {
+        //            col.RelativeColumn(1);
+        //            col.RelativeColumn(2);
+        //            col.RelativeColumn(4);
+        //            col.RelativeColumn(5);
+        //        });
+        //        //列名
+        //        table.Cell().Row(1).Column(1).Element(BlockHeader).Text("序号").Style(tHeaderStyle);
+        //        table.Cell().Row(1).Column(2).Element(BlockHeader).Text("许可文件编号/文书号").Style(tHeaderStyle);
+        //        table.Cell().Row(1).Column(3).Element(BlockHeader).Text("决定许可机关").Style(tHeaderStyle);
+        //        table.Cell().Row(1).Column(4).Element(BlockHeader).Text("许可内容").Style(tHeaderStyle);
 
-                if (administrativeLicenses != null && administrativeLicenses.Count > 0)
-                {
-                    uint rowIndex = 1;
-                    foreach (var changeInfo in administrativeLicenses)
-                    {
-                        uint colIndex = 0;
-                        ++rowIndex;
-                        table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text($"{rowIndex - 1}").Style(tColStyle);
-                        table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text(changeInfo.LicenseNumber).Style(tColStyle);
-                        table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text(changeInfo.LicenceDepartment).Style(tColStyle);
-                        table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text(changeInfo.LicenceContent).Style(tColStyle);
-                    }
-                }
-            });
-        }
+        //        if (administrativeLicenses != null && administrativeLicenses.Count > 0)
+        //        {
+        //            uint rowIndex = 1;
+        //            foreach (var changeInfo in administrativeLicenses)
+        //            {
+        //                uint colIndex = 0;
+        //                ++rowIndex;
+        //                table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text($"{rowIndex - 1}").Style(tColStyle);
+        //                table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text(changeInfo.LicenseNumber).Style(tColStyle);
+        //                table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text(changeInfo.LicenceDepartment).Style(tColStyle);
+        //                table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text(changeInfo.LicenceContent).Style(tColStyle);
+        //            }
+        //        }
+        //    });
+        //}
 
-        public static void ComposeShareholder(this ColumnDescriptor col, string title, TextStyle titleStyle, TextStyle tHeaderStyle, TextStyle tColStyle, List<Shareholder>? shareholders)
-        {
-            col.Item().Text(title).Style(titleStyle);
+        //public static void ComposeShareholder(this ColumnDescriptor col, string title, TextStyle titleStyle, TextStyle tHeaderStyle, TextStyle tColStyle, List<Shareholder>? shareholders)
+        //{
+        //    col.Item().Text(title).Style(titleStyle);
 
-            col.Item().Border(1).Table(table =>
-            {
-                table.ColumnsDefinition(col =>
-                {
-                    col.RelativeColumn(1);
-                    col.RelativeColumn(2);
-                    col.RelativeColumn(4);
-                    col.RelativeColumn(5);
-                });
-                //列名
-                table.Cell().Row(1).Column(1).Element(BlockHeader).Text("序号").Style(tHeaderStyle);
-                table.Cell().Row(1).Column(2).Element(BlockHeader).Text("股东名称").Style(tHeaderStyle);
-                table.Cell().Row(1).Column(3).Element(BlockHeader).Text("认缴金额").Style(tHeaderStyle);
-                table.Cell().Row(1).Column(4).Element(BlockHeader).Text("占比").Style(tHeaderStyle);
+        //    col.Item().Border(1).Table(table =>
+        //    {
+        //        table.ColumnsDefinition(col =>
+        //        {
+        //            col.RelativeColumn(1);
+        //            col.RelativeColumn(2);
+        //            col.RelativeColumn(4);
+        //            col.RelativeColumn(5);
+        //        });
+        //        //列名
+        //        table.Cell().Row(1).Column(1).Element(BlockHeader).Text("序号").Style(tHeaderStyle);
+        //        table.Cell().Row(1).Column(2).Element(BlockHeader).Text("股东名称").Style(tHeaderStyle);
+        //        table.Cell().Row(1).Column(3).Element(BlockHeader).Text("认缴金额").Style(tHeaderStyle);
+        //        table.Cell().Row(1).Column(4).Element(BlockHeader).Text("占比").Style(tHeaderStyle);
 
-                if (shareholders != null && shareholders.Count > 0)
-                {
-                    uint rowIndex = 1;
+        //        if (shareholders != null && shareholders.Count > 0)
+        //        {
+        //            uint rowIndex = 1;
 
-                    foreach (var changeInfo in shareholders)
-                    {
-                        uint colIndex = 0;
+        //            foreach (var changeInfo in shareholders)
+        //            {
+        //                uint colIndex = 0;
 
-                        foreach (var capitalItem in changeInfo.Capital)
-                        {
-                            ++rowIndex;
-                            table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text($"{rowIndex - 1}").Style(tColStyle);
-                            table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text(changeInfo.Name).Style(tColStyle);
-                            table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text(capitalItem.Amomon).Style(tColStyle);
-                            table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text(capitalItem.Percent).Style(tColStyle);
+        //                foreach (var capitalItem in changeInfo.Capital)
+        //                {
+        //                    ++rowIndex;
+        //                    table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text($"{rowIndex - 1}").Style(tColStyle);
+        //                    table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text(changeInfo.Name).Style(tColStyle);
+        //                    table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text(capitalItem.Amomon).Style(tColStyle);
+        //                    table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text(capitalItem.Percent).Style(tColStyle);
 
-                        }
-                    }
-                }
-            });
-        }
+        //                }
+        //            }
+        //        }
+        //    });
+        //}
 
-        public static void ComposeInvestments(this ColumnDescriptor col, string title, TextStyle titleStyle, TextStyle tHeaderStyle, TextStyle tColStyle, List<Investment>? investments)
-        {
-            col.Item().Text(title).Style(titleStyle);
+        //public static void ComposeInvestments(this ColumnDescriptor col, string title, TextStyle titleStyle, TextStyle tHeaderStyle, TextStyle tColStyle, List<Investment>? investments)
+        //{
+        //    col.Item().Text(title).Style(titleStyle);
 
-            col.Item().Border(1).Table(table =>
-            {
-                table.ColumnsDefinition(col =>
-                {
-                    col.RelativeColumn(1);
-                    col.RelativeColumn(5);
-                    col.RelativeColumn(2);
-                    col.RelativeColumn(2);
-                    col.RelativeColumn(2);
-                });
-                //列名
-                table.Cell().Row(1).Column(1).Element(BlockHeader).Text("序号").Style(tHeaderStyle);
-                table.Cell().Row(1).Column(2).Element(BlockHeader).Text("企业名称").Style(tHeaderStyle);
-                table.Cell().Row(1).Column(3).Element(BlockHeader).Text("企业注册资本").Style(tHeaderStyle);
-                table.Cell().Row(1).Column(4).Element(BlockHeader).Text("投资总额").Style(tHeaderStyle);
-                table.Cell().Row(1).Column(5).Element(BlockHeader).Text("投资占比").Style(tHeaderStyle);
+        //    col.Item().Border(1).Table(table =>
+        //    {
+        //        table.ColumnsDefinition(col =>
+        //        {
+        //            col.RelativeColumn(1);
+        //            col.RelativeColumn(5);
+        //            col.RelativeColumn(2);
+        //            col.RelativeColumn(2);
+        //            col.RelativeColumn(2);
+        //        });
+        //        //列名
+        //        table.Cell().Row(1).Column(1).Element(BlockHeader).Text("序号").Style(tHeaderStyle);
+        //        table.Cell().Row(1).Column(2).Element(BlockHeader).Text("企业名称").Style(tHeaderStyle);
+        //        table.Cell().Row(1).Column(3).Element(BlockHeader).Text("企业注册资本").Style(tHeaderStyle);
+        //        table.Cell().Row(1).Column(4).Element(BlockHeader).Text("投资总额").Style(tHeaderStyle);
+        //        table.Cell().Row(1).Column(5).Element(BlockHeader).Text("投资占比").Style(tHeaderStyle);
 
-                if (investments != null && investments.Count > 0)
-                {
-                    uint rowIndex = 1;
-                    foreach (var investment in investments)
-                    {
-                        uint colIndex = 0;
+        //        if (investments != null && investments.Count > 0)
+        //        {
+        //            uint rowIndex = 1;
+        //            foreach (var investment in investments)
+        //            {
+        //                uint colIndex = 0;
 
-                        ++rowIndex;
+        //                ++rowIndex;
 
-                        table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text($"{rowIndex - 1}").Style(tColStyle);
-                        table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text(investment.Name).Style(tColStyle);
-                        table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text(investment.RegCapital).Style(tColStyle);
-                        table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text($"{investment.Amount}{investment.AmountSuffix}").Style(tColStyle);
-                        table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text(investment.Percent).Style(tColStyle);
-                    }
-                }
-            });
-        }
-        public static void ComposeBranches(this ColumnDescriptor col, string title, TextStyle titleStyle, TextStyle tHeaderStyle, TextStyle tColStyle, List<Branch>? branches)
-        {
-            col.Item().Text(title).Style(titleStyle);
+        //                table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text($"{rowIndex - 1}").Style(tColStyle);
+        //                table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text(investment.Name).Style(tColStyle);
+        //                table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text(investment.RegCapital).Style(tColStyle);
+        //                table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text($"{investment.Amount}{investment.AmountSuffix}").Style(tColStyle);
+        //                table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text(investment.Percent).Style(tColStyle);
+        //            }
+        //        }
+        //    });
+        //}
+        //public static void ComposeBranches(this ColumnDescriptor col, string title, TextStyle titleStyle, TextStyle tHeaderStyle, TextStyle tColStyle, List<Branch>? branches)
+        //{
+        //    col.Item().Text(title).Style(titleStyle);
 
-            col.Item().Border(1).Table(table =>
-            {
-                table.ColumnsDefinition(col =>
-                {
-                    col.RelativeColumn(1);
-                    col.RelativeColumn(5);
-                    col.RelativeColumn(2);
-                    col.RelativeColumn(2);
-                    col.RelativeColumn(2);
-                });
-                //列名
-                table.Cell().Row(1).Column(1).Element(BlockHeader).Text("序号").Style(tHeaderStyle);
-                table.Cell().Row(1).Column(2).Element(BlockHeader).Text("企业名称").Style(tHeaderStyle);
-                table.Cell().Row(1).Column(3).Element(BlockHeader).Text("法定代表人").Style(tHeaderStyle);
-                table.Cell().Row(1).Column(4).Element(BlockHeader).Text("注册资本").Style(tHeaderStyle);
-                table.Cell().Row(1).Column(5).Element(BlockHeader).Text("经营状态").Style(tHeaderStyle);
+        //    col.Item().Border(1).Table(table =>
+        //    {
+        //        table.ColumnsDefinition(col =>
+        //        {
+        //            col.RelativeColumn(1);
+        //            col.RelativeColumn(5);
+        //            col.RelativeColumn(2);
+        //            col.RelativeColumn(2);
+        //            col.RelativeColumn(2);
+        //        });
+        //        //列名
+        //        table.Cell().Row(1).Column(1).Element(BlockHeader).Text("序号").Style(tHeaderStyle);
+        //        table.Cell().Row(1).Column(2).Element(BlockHeader).Text("企业名称").Style(tHeaderStyle);
+        //        table.Cell().Row(1).Column(3).Element(BlockHeader).Text("法定代表人").Style(tHeaderStyle);
+        //        table.Cell().Row(1).Column(4).Element(BlockHeader).Text("注册资本").Style(tHeaderStyle);
+        //        table.Cell().Row(1).Column(5).Element(BlockHeader).Text("经营状态").Style(tHeaderStyle);
 
-                if (branches != null && branches.Count > 0)
-                {
-                    uint rowIndex = 1;
-                    foreach (var investment in branches)
-                    {
-                        uint colIndex = 0;
+        //        if (branches != null && branches.Count > 0)
+        //        {
+        //            uint rowIndex = 1;
+        //            foreach (var investment in branches)
+        //            {
+        //                uint colIndex = 0;
 
-                        ++rowIndex;
+        //                ++rowIndex;
 
-                        table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text($"{rowIndex - 1}").Style(tColStyle);
-                        table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text(investment.Name).Style(tColStyle);
-                        table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text(investment.LegalPersonName).Style(tColStyle);
-                        table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text($"{investment.RegCapital}").Style(tColStyle);
-                        table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text(investment.RegStatus).Style(tColStyle);
-                    }
-                }
-            });
-        }
+        //                table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text($"{rowIndex - 1}").Style(tColStyle);
+        //                table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text(investment.Name).Style(tColStyle);
+        //                table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text(investment.LegalPersonName).Style(tColStyle);
+        //                table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text($"{investment.RegCapital}").Style(tColStyle);
+        //                table.Cell().Row(rowIndex).Column(++colIndex).Element(BlockContent).Text(investment.RegStatus).Style(tColStyle);
+        //            }
+        //        }
+        //    });
+        //}
 
         public static IContainer BlockHeader(IContainer container)
         {

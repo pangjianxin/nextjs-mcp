@@ -8,9 +8,7 @@ namespace Wallee.Mcp.CorporateInfos.Dtos;
 [Serializable]
 public class CorporateInfoGetListInput : FilterBase, IPagedAndSortedResultRequest
 {
-    [CompareTo(
-        nameof(CorporateInfoDto.Name),
-        nameof(CorporateInfoDto.CreditCode))]
+    [CompareTo(nameof(CorporateInfoDto.Name), nameof(CorporateInfoDto.CreditCode))]
     [StringFilterOptions(AutoFilterer.Enums.StringFilterOption.Contains)]
     public string? Filter { get; set; }
     public int SkipCount { get; set; }

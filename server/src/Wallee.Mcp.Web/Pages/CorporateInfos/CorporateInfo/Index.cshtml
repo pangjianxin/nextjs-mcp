@@ -1,0 +1,51 @@
+@page
+@using Wallee.Mcp.Permissions
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Mvc.Localization
+@using Volo.Abp.AspNetCore.Mvc.UI.Layout
+@using Wallee.Mcp.Web.Pages.CorporateInfos.CorporateInfo
+@using Wallee.Mcp.Localization
+@using Wallee.Mcp.Web.Menus
+@model IndexModel
+@inject IPageLayout PageLayout
+@inject IHtmlLocalizer<McpResource> L
+@inject IAuthorizationService Authorization
+@{
+    PageLayout.Content.Title = L["CorporateInfo"].Value;
+    PageLayout.Content.BreadCrumb.Add(L["Menu:CorporateInfo"].Value);
+    PageLayout.Content.MenuItemName = McpMenus.CorporateInfo;
+}
+
+@section scripts
+{
+    <abp-script src="/Pages/CorporateInfos/CorporateInfo/index.js" />
+}
+@section styles
+{
+    <abp-style src="/Pages/CorporateInfos/CorporateInfo/index.css"/>
+}
+@section content_toolbar
+{
+	@if (await Authorization.IsGrantedAsync(McpPermissions.CorporateInfo.Create))
+    {
+        <abp-button id="NewCorporateInfoButton"
+            text="@L["CreateCorporateInfo"].Value"
+            icon="plus" size="Small"
+            button-type="Primary" />
+    }
+}
+
+<abp-card>
+    <abp-card-body>
+        <abp-row class="mb-3">
+            <a abp-collapse-id="CorporateInfoCollapse" class="text-secondary">@L["TableFilter"] </a>
+        </abp-row>
+        <abp-dynamic-form abp-model="CorporateInfoFilter" id="CorporateInfoFilter" required-symbols="false" column-size="_3">
+            <abp-collapse-body id="CorporateInfoCollapse">
+                <abp-form-content />
+            </abp-collapse-body>
+        </abp-dynamic-form>
+        <hr />
+        <abp-table striped-rows="true" id="CorporateInfoTable" class="nowrap"/>
+    </abp-card-body>
+</abp-card>

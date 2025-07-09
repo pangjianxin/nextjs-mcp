@@ -1,3 +1,4 @@
+using Wallee.Mcp.CorporateInfos;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
@@ -41,8 +42,7 @@ public class McpEntityFrameworkCoreModule : AbpModule
     {
         context.Services.AddAbpDbContext<McpDbContext>(options =>
         {
-                /* Remove "includeAllEntities: true" to create
-                 * default repositories only for aggregate roots */
+            options.AddRepository<CorporateInfo, CorporateInfoRepository>();
             options.AddDefaultRepositories(includeAllEntities: true);
         });
 
@@ -59,6 +59,6 @@ public class McpEntityFrameworkCoreModule : AbpModule
             options.UseNpgsql();
 
         });
-        
+
     }
 }

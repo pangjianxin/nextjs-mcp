@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Azure;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Agents;
@@ -71,6 +74,35 @@ namespace Wallee.Mcp.SignalR
             }
 
             // 所有消息发送完成后再进行历史归约
+            if (chatAgent.HistoryReducer != null)
+            {
+                await chatAgent.ReduceAsync(chatHistoryAgentThread.ChatHistory, cancellationToken: cancellationToken);
+            }
+        }
+
+
+        /// <summary>
+        /// 单次AI对话，回复内容仅发送给当前客户端
+        /// </summary>
+        public async Task ChatOnce(string input, CancellationToken cancellationToken)
+        {
+            // 获取当前连接的 ChatHistoryAgentThread
+            if (!Context.Items.TryGetValue(ChatHistoryKey, out var threadObj) || threadObj is not ChatHistoryAgentThread chatHistoryAgentThread)
+            {
+                chatHistoryAgentThread = new ChatHistoryAgentThread();
+                chatHistoryAgentThread.AIContextProviders.Add(new WhiteboardProvider(_chatClient));
+                Context.Items[ChatHistoryKey] = chatHistoryAgentThread;
+            }
+
+            var message = new ChatMessageContent(AuthorRole.User, input);
+
+            // 先发送消息流
+            await foreach (var response in chatAgent.InvokeStreamingAsync(message, chatHistoryAgentThread, cancellationToken: cancellationToken))
+            {
+                // 将AI回复内容推送给当前客户端
+                await Clients.Caller.SendAsync("ReceiveChat", response, cancellationToken);
+            }
+            // 可选：历史归约
             if (chatAgent.HistoryReducer != null)
             {
                 await chatAgent.ReduceAsync(chatHistoryAgentThread.ChatHistory, cancellationToken: cancellationToken);

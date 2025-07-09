@@ -44,7 +44,6 @@
     <ProjectReference Include="..\Wallee.Mcp.Application\Wallee.Mcp.Application.csproj" />
     <ProjectReference Include="..\Wallee.Mcp.HttpApi\Wallee.Mcp.HttpApi.csproj" />
     <ProjectReference Include="..\Wallee.Mcp.EntityFrameworkCore\Wallee.Mcp.EntityFrameworkCore.csproj" />
-    <ProjectReference Include="..\Wallee.Mcp.Mongo\Wallee.Mcp.Mongo.csproj" />
     <ProjectReference Include="..\Wallee.Mcp.Servers\Wallee.Mcp.Servers.csproj" />
   </ItemGroup>
 

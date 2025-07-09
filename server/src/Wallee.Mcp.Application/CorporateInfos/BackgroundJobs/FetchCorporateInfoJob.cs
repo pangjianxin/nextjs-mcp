@@ -34,17 +34,17 @@ namespace Wallee.Mcp.CorporateInfos.BackgroundJobs
         {
             await _tianYanChaCorporateInfoFetcher.FetchCorporateInfoAsync(args.CreditCode);
 
-            await _tianYanChaCorporateInfoFetcher.FetchStaffsAsync(args.CreditCode);
+            //await _tianYanChaCorporateInfoFetcher.FetchStaffsAsync(args.CreditCode);
 
-            await _tianYanChaCorporateInfoFetcher.FetchChangeInfosAsync(args.CreditCode);
+            //await _tianYanChaCorporateInfoFetcher.FetchChangeInfosAsync(args.CreditCode);
 
-            await _tianYanChaCorporateInfoFetcher.FetchBranchesAsync(args.CreditCode);
+            //await _tianYanChaCorporateInfoFetcher.FetchBranchesAsync(args.CreditCode);
 
-            await _tianYanChaCorporateInfoFetcher.FetchInvestmentsAsync(args.CreditCode);
+            //await _tianYanChaCorporateInfoFetcher.FetchInvestmentsAsync(args.CreditCode);
 
-            await _tianYanChaCorporateInfoFetcher.FetchAdministrativeLicensesAsync(args.CreditCode);
+            //await _tianYanChaCorporateInfoFetcher.FetchAdministrativeLicensesAsync(args.CreditCode);
 
-            await _tianYanChaCorporateInfoFetcher.FetchShareholdersAsync(args.CreditCode);
+            //await _tianYanChaCorporateInfoFetcher.FetchShareholdersAsync(args.CreditCode);
         }
     }
 }

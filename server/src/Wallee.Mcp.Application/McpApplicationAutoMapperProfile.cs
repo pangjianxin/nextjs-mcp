@@ -1,4 +1,7 @@
+using Wallee.Mcp.CorporateInfos;
+using Wallee.Mcp.CorporateInfos.Dtos;
 using AutoMapper;
+using Wallee.Mcp.CorporateInfos.Records;
 
 namespace Wallee.Mcp;
 
@@ -6,8 +9,9 @@ public class McpApplicationAutoMapperProfile : Profile
 {
     public McpApplicationAutoMapperProfile()
     {
-        /* You can configure your AutoMapper mapping configuration here.
-         * Alternatively, you can split your mapping configurations
-         * into multiple profile classes for a better organization. */
+        CreateMap<CorporateInfo, CorporateInfoDto>();
+        CreateMap<CorporateInfoRecord, CorporateInfo>();
+        CreateMap<IndustryAllInfo, IndustryAllInfoDto>();
+        CreateMap<IndustryAllRecord, IndustryAllInfo>();
     }
 }
