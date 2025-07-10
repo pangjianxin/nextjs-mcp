@@ -11,6 +11,8 @@ using Microsoft.Extensions.DependencyInjection;
 using QuestPDF.Drawing;
 using QuestPDF.Infrastructure;
 using System.Reflection;
+using Volo.Abp.VirtualFileSystem;
+using System;
 
 namespace Wallee.Mcp;
 
@@ -31,7 +33,7 @@ public class McpApplicationModule : AbpModule
     {
         QuestPDF.Settings.License = LicenseType.Community;
         QuestPDF.Settings.CheckIfAllTextGlyphsAreAvailable = false;
-        Assembly assembly = Assembly.GetExecutingAssembly();
+        Assembly assembly = typeof(McpDomainSharedModule).Assembly;
         using var fileInfo = assembly.GetManifestResourceStream("Wallee.Mcp.fonts.simhei.ttf");
         FontManager.RegisterFontWithCustomName("myFont", fileInfo!);
     }
@@ -42,6 +44,12 @@ public class McpApplicationModule : AbpModule
         Configure<AbpAutoMapperOptions>(options =>
         {
             options.AddMaps<McpApplicationModule>();
+        });
+
+        context.Services.AddHttpClient(OpenRemoteServiceConsts.TianYanCha, (serviceProvider, client) =>
+        {
+            client.DefaultRequestHeaders.Add("Authorization", configuration[$"{OpenRemoteServiceConsts.TianYanCha}:Token"]);
+            client.BaseAddress = new Uri(configuration[$"{OpenRemoteServiceConsts.TianYanCha}:BaseUrl"]!);
         });
     }
 }

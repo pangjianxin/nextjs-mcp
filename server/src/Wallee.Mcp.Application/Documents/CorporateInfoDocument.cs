@@ -78,7 +78,7 @@ namespace Wallee.Mcp.Documents
 
         private void ComposeHeader(IContainer container)
         {
-            using var stream = _virtualFileProvider.GetFileInfo("/Wallee/Openai/images/logo.png").CreateReadStream();
+            using var stream = _virtualFileProvider.GetFileInfo("images/logo.png").CreateReadStream();
 
             var titleStyle = TextStyle.Default.FontSize(12).SemiBold().FontColor("bcbcbc");
 
@@ -183,8 +183,8 @@ namespace Wallee.Mcp.Documents
 
         private void ComposeCover(IContainer container)
         {
-            using var topLeftPng = _virtualFileProvider.GetFileInfo("/Wallee/Openai/images/top-left.jpg").CreateReadStream();
-            using var bottomRightPng = _virtualFileProvider.GetFileInfo("/Wallee/Openai/images/bottom-right.jpg").CreateReadStream();
+            using var topLeftPng = _virtualFileProvider.GetFileInfo("images/top-left.jpg").CreateReadStream();
+            using var bottomRightPng = _virtualFileProvider.GetFileInfo("images/bottom-right.jpg").CreateReadStream();
 
             container.Column(col =>
             {
@@ -244,7 +244,7 @@ namespace Wallee.Mcp.Documents
 
         private void ComposeForeground(IContainer container)
         {
-            using var waterMark = _virtualFileProvider.GetFileInfo("/Wallee/Openai/images/watermark.png").CreateReadStream();
+            using var waterMark = _virtualFileProvider.GetFileInfo("images/watermark.png").CreateReadStream();
 
             container.AlignCenter().AlignMiddle().Height(200).Width(200).Column(col =>
             {

@@ -51,61 +51,29 @@ namespace Wallee.Mcp.SignalR
             return base.OnConnectedAsync();
         }
 
-        public async IAsyncEnumerable<AgentResponseItem<StreamingChatMessageContent>> Chat(
-            string input,
-            [EnumeratorCancellation] CancellationToken cancellationToken)
-        {
-            // 获取当前连接的 ChatHistoryAgentThread  
-            if (!Context.Items.TryGetValue(ChatHistoryKey, out var threadObj) || threadObj is not ChatHistoryAgentThread chatHistoryAgentThread)
-            {
-                // 兜底：如果未初始化则新建（理论上不会发生）  
-                chatHistoryAgentThread = new ChatHistoryAgentThread();
-                chatHistoryAgentThread.AIContextProviders.Add(new WhiteboardProvider(_chatClient));
-                Context.Items[ChatHistoryKey] = chatHistoryAgentThread;
-            }
-
-            var message = new ChatMessageContent(AuthorRole.User, input);
-
-            // 先发送消息流
-            await foreach (var response in chatAgent.InvokeStreamingAsync(message, chatHistoryAgentThread, cancellationToken: cancellationToken))
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                yield return response;
-            }
-
-            // 所有消息发送完成后再进行历史归约
-            if (chatAgent.HistoryReducer != null)
-            {
-                await chatAgent.ReduceAsync(chatHistoryAgentThread.ChatHistory, cancellationToken: cancellationToken);
-            }
-        }
-
-
-        /// <summary>
-        /// 单次AI对话，回复内容仅发送给当前客户端
-        /// </summary>
-        public async Task ChatOnce(string input, CancellationToken cancellationToken)
+        // 在 Chat 方法中，将 ReduceAsync 调用放到后台任务中执行，不阻塞主流程
+        public async Task Chat(ChatMessage input)
         {
             // 获取当前连接的 ChatHistoryAgentThread
             if (!Context.Items.TryGetValue(ChatHistoryKey, out var threadObj) || threadObj is not ChatHistoryAgentThread chatHistoryAgentThread)
             {
-                chatHistoryAgentThread = new ChatHistoryAgentThread();
-                chatHistoryAgentThread.AIContextProviders.Add(new WhiteboardProvider(_chatClient));
-                Context.Items[ChatHistoryKey] = chatHistoryAgentThread;
+                throw new Exception("ChatHistoryAgentThread is not initialized. Please connect to the hub first.");
             }
 
-            var message = new ChatMessageContent(AuthorRole.User, input);
+            var message = new ChatMessageContent(AuthorRole.User, input.Input);
 
             // 先发送消息流
-            await foreach (var response in chatAgent.InvokeStreamingAsync(message, chatHistoryAgentThread, cancellationToken: cancellationToken))
+            await foreach (var response in chatAgent.InvokeStreamingAsync(message, chatHistoryAgentThread, cancellationToken: Context.ConnectionAborted))
             {
                 // 将AI回复内容推送给当前客户端
-                await Clients.Caller.SendAsync("ReceiveChat", response, cancellationToken);
+                await Clients.Caller.SendAsync("ReceiveChat", response, cancellationToken: Context.ConnectionAborted);
             }
-            // 可选：历史归约
+            // 可选：历史归约，放到后台任务中异步执行
             if (chatAgent.HistoryReducer != null)
             {
-                await chatAgent.ReduceAsync(chatHistoryAgentThread.ChatHistory, cancellationToken: cancellationToken);
+                _ = Task.Run(() =>
+                    chatAgent.ReduceAsync(chatHistoryAgentThread.ChatHistory, cancellationToken: CancellationToken.None)
+                );
             }
         }
     }

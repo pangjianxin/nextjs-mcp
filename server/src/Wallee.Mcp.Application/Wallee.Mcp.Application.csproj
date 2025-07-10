@@ -9,10 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="fonts\simhei.ttf" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Wallee.Mcp.Domain\Wallee.Mcp.Domain.csproj" />
     <ProjectReference Include="..\Wallee.Mcp.Application.Contracts\Wallee.Mcp.Application.Contracts.csproj" />
   </ItemGroup>

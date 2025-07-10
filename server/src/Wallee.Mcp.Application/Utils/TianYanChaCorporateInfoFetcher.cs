@@ -55,39 +55,22 @@ namespace Wallee.Mcp.Utils
 
         public async Task<CorporateInfoDto> FetchCorporateInfoAsync(string keyWord)
         {
+            // 先从数据库查找
+            var exists = await _repository.FindAsync(it => it.CreditCode == keyWord || it.Name == keyWord);
+
+            if (exists != null)
+            {
+                return _objectMapper.Map<CorporateInfo, CorporateInfoDto>(exists);
+            }
+
+            // 数据库没有，调用天眼查接口
             var r = await HttpGetResultAsync<CorporateInfoRecord>("/services/open/ic/baseinfoV2/2.0", keyWord);
 
             if (r != null)
             {
-                var exists = await _repository.FindAsync(it => it.CreditCode == r.CreditCode);
-
-                if (exists == null)
-                {
-                    var entity = _objectMapper.Map<CorporateInfoRecord, CorporateInfo>(r);
-                    entity = await _repository.InsertAsync(entity);
-
-                    return _objectMapper.Map<CorporateInfo, CorporateInfoDto>(entity);
-                }
-                else
-                {
-                    if (exists.LastModificationTime.HasValue && (_clock.Now - exists.LastModificationTime) > TimeSpan.FromDays(90))
-                    {
-                        var industryAll = r.IndustryAll == null ? null : _objectMapper.Map<IndustryAllRecord, IndustryAllInfo>(r.IndustryAll);
-
-                        exists.Update(r.RegCapital, r.RegCapitalCurrency, r.ActualCapital, r.ActualCapitalCurrency,
-                            r.LegalPersonName, r.Type, r.CompanyOrgType, r.RegInstitute, r.RegNumber,
-                            r.Base, r.RegLocation, r.RegStatus, r.BusinessScope, r.Industry, industryAll, r.PercentileScore, r.ApprovedTime, r.EstiblishTime, r.FromTime,
-                            r.ToTime, r.UpdateTimes, r.CancelDate, r.CancelReason, r.RevokeDate, r.RevokeReason, r.IsMicroEnt, r.SocialStaffNum,
-                            r.StaffNumRange, r.Tags, r.TaxNumber, r.OrgNumber, r.Alias, r.Property3, r.HistoryNames, r.HistoryNameList, r.EmailList, r.PhoneNumber,
-                            r.WebsiteList, r.City, r.District, r.DistrictCode, r.BondNum, r.BondName, r.BondType, r.UsedBondName, r.BRNNumber, r.EconomicFunctionZone1, r.EconomicFunctionZone2
-                        );
-
-                        await _repository.UpdateAsync(exists);
-                    }
-                }
-
-                return _objectMapper.Map<CorporateInfo, CorporateInfoDto>(exists);
-
+                var entity = _objectMapper.Map<CorporateInfoRecord, CorporateInfo>(r);
+                entity = await _repository.InsertAsync(entity);
+                return _objectMapper.Map<CorporateInfo, CorporateInfoDto>(entity);
             }
 
             throw new ArgumentException($"{keyWord}没有查找到任何信息");

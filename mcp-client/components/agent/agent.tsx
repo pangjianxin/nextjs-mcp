@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Send, Bot, User, Loader2, Circle, Zap } from "lucide-react";
 import { MarkdownRenderer } from "@/components/sections/markdown-renderer";
-import { useSignalRChat, type ChatMessage } from "@/hooks/use-signalr-chat";
+import { useSignalRChat, type ChatMessage } from "@/hooks/use-signalr-chat-2";
 
 interface SignalRChatProps {
   hubUrl: string;
@@ -402,3 +402,5 @@ export function SignalRChat({ hubUrl, className = "" }: SignalRChatProps) {
     </div>
   );
 }
+
+

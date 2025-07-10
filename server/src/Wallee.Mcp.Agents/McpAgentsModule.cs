@@ -1,54 +1,59 @@
-﻿using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Agents;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using System;
-using Volo.Abp.AspNetCore.SignalR;
 using Volo.Abp.Modularity;
 using Wallee.Mcp.Plugins;
-using Wallee.Mcp.SignalR;
 
 namespace Wallee.Mcp
 {
     [DependsOn(
         typeof(McpDomainModule),
-        typeof(McpApplicationContractsModule),
-        typeof(AbpAspNetCoreSignalRModule)
+        typeof(McpApplicationContractsModule)
         )]
     public class McpAgentsModule : AbpModule
     {
+        public override void PreConfigureServices(ServiceConfigurationContext context)
+        {
+
+        }
 
         public override void ConfigureServices(ServiceConfigurationContext context)
         {
             var configuration = context.Services.GetConfiguration();
-            ConfigureHubFilter();
-            ConfigureSemanticKernel(context, configuration);
+
+            AddSemanticKernel(context, configuration);
+
+            AddChatCompletionAgent(context, configuration);
         }
 
-        private void ConfigureHubFilter()
+        public static void AddSemanticKernel(ServiceConfigurationContext context, IConfiguration configuration)
         {
-            Configure<HubOptions>(options =>
-            {
-                options.AddFilter<AbpUnitOfWorkHubFilter>();
-            });
+            context.Services.AddTransient(serviceProvider =>
+           {
+               IKernelBuilder kernelBuilder = Kernel.CreateBuilder();
+
+               kernelBuilder.AddOpenAIChatCompletion(
+                   modelId: configuration["DeepSeek:ModelId"]!,
+                   endpoint: new Uri(configuration["DeepSeek:EndPoint"]!),
+                   apiKey: configuration["DeepSeek:ApiKey"]!,
+                   serviceId: "deepseek-chat");
+
+               return kernelBuilder.Build();
+           });
+
+
         }
 
-        private void ConfigureSemanticKernel(ServiceConfigurationContext context, IConfiguration configuration)
+        private void AddChatCompletionAgent(ServiceConfigurationContext context, IConfiguration configuration)
         {
-            context.Services.AddKernel()
-                .AddOpenAIChatCompletion(
-                    modelId: configuration["DeepSeek:ModelId"]!,
-                    endpoint: new Uri(configuration["DeepSeek:EndPoint"]!),
-                    apiKey: configuration["DeepSeek:ApiKey"]!,
-                    serviceId: "deepseek-chat");
-
-            context.Services.AddKeyedTransient("memory-test-agent", (sp, key) =>
+            context.Services.AddKeyedTransient("corporate-info-agent", (sp, key) =>
             {
                 var agentKernel = sp.GetRequiredService<Kernel>().Clone();
-                var chatService = sp.GetRequiredKeyedService<IChatCompletionService>("deepseek-chat");
+                var chatService = agentKernel.Services.GetRequiredKeyedService<IChatCompletionService>("deepseek-chat");
 
                 agentKernel.Plugins.AddFromType<CorporateInfoPlugin>("corporateInfoPlugin", sp);
 
@@ -123,7 +128,7 @@ namespace Wallee.Mcp
                     Arguments = new KernelArguments(new OpenAIPromptExecutionSettings()
                     {
                         ServiceId = "deepseek-chat",
-                        FunctionChoiceBehavior = FunctionChoiceBehavior.Auto()
+                        FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(options: new() { RetainArgumentTypes = true }),
                     }),
 
                     //HistoryReducer = new ChatHistoryTruncationReducer(3, 3)

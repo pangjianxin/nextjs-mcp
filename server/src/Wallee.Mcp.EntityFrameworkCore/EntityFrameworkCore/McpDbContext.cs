@@ -14,6 +14,7 @@ using Volo.Abp.TenantManagement;
 using Volo.Abp.TenantManagement.EntityFrameworkCore;
 using Wallee.Mcp.CorporateInfos;
 using Volo.Abp.EntityFrameworkCore.Modeling;
+using Wallee.Mcp.CorporateReports;
 
 namespace Wallee.Mcp.EntityFrameworkCore;
 
@@ -60,6 +61,7 @@ public class McpDbContext :
     /// 企业信息
     /// </summary>
     public DbSet<CorporateInfo> CorporateInfos { get; set; }
+    public DbSet<CorporateReport> CorporateReports { get; set; }
 
     public McpDbContext(DbContextOptions<McpDbContext> options)
         : base(options)
@@ -149,6 +151,22 @@ public class McpDbContext :
                 config.Property(e => e.CategoryBig).HasMaxLength(255);
                 config.Property(e => e.CategoryMiddle).HasMaxLength(255);
                 config.Property(e => e.CategorySmall).HasMaxLength(255);
+                config.ToJson();
+            });
+        });
+
+        builder.Entity<CorporateReport>(builder =>
+        {
+            builder.ToTable(McpConsts.DbTablePrefix + "CorporateReports", McpConsts.DbSchema, table => table.HasComment("企业报告信息"));
+            builder.ConfigureByConvention();
+            builder.HasKey(e => e.Id);
+            builder.HasAlternateKey(e => new { e.CompanyName, e.CompanyUniscId });
+            builder.Property(it => it.CompanyName).HasMaxLength(128).IsRequired();
+            builder.Property(it => it.CompanyUniscId).HasMaxLength(32).IsRequired();
+            builder.Property(it => it.DocumentName).HasMaxLength(256);
+            builder.OwnsMany(it => it.TransmissionHistories, config =>
+            {
+                config.Property(it => it.Email).IsRequired();
                 config.ToJson();
             });
         });

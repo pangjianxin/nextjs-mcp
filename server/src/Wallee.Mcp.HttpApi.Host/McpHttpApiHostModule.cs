@@ -22,6 +22,8 @@ using Volo.Abp.AspNetCore.Mvc.UI.Theme.LeptonXLite.Bundling;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.Shared;
 using Volo.Abp.AspNetCore.Serilog;
 using Volo.Abp.Autofac;
+using Volo.Abp.BlobStoring;
+using Volo.Abp.BlobStoring.FileSystem;
 using Volo.Abp.Modularity;
 using Volo.Abp.OpenIddict;
 using Volo.Abp.Security.Claims;
@@ -48,8 +50,8 @@ namespace Wallee.Mcp;
     typeof(AbpAccountWebOpenIddictModule),
     typeof(AbpSwashbuckleModule),
     typeof(AbpAspNetCoreSerilogModule),
-    typeof(McpServersModule),
-    typeof(McpAgentsModule)
+    typeof(McpAgentsModule),
+    typeof(AbpBlobStoringFileSystemModule)
     )]
 public class McpHttpApiHostModule : AbpModule
 {
@@ -116,6 +118,21 @@ public class McpHttpApiHostModule : AbpModule
         ConfigureVirtualFileSystem(context);
         ConfigureCors(context, configuration);
         ConfigMcpServer(context);
+        ConfigureBlobStoring();
+    }
+
+    private void ConfigureBlobStoring()
+    {
+        Configure<AbpBlobStoringOptions>(options =>
+        {
+            options.Containers.ConfigureDefault(container =>
+            {
+                container.UseFileSystem(fileSystem =>
+                {
+                    fileSystem.BasePath = "D:\\my-files";
+                });
+            });
+        });
     }
 
     private void ConfigureAuthentication(ServiceConfigurationContext context)

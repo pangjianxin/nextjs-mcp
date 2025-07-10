@@ -13,6 +13,7 @@ using Volo.Abp.PermissionManagement.EntityFrameworkCore;
 using Volo.Abp.SettingManagement.EntityFrameworkCore;
 using Volo.Abp.Studio;
 using Volo.Abp.TenantManagement.EntityFrameworkCore;
+using Wallee.Mcp.CorporateReports;
 
 namespace Wallee.Mcp.EntityFrameworkCore;
 
@@ -43,13 +44,14 @@ public class McpEntityFrameworkCoreModule : AbpModule
         context.Services.AddAbpDbContext<McpDbContext>(options =>
         {
             options.AddRepository<CorporateInfo, CorporateInfoRepository>();
+            options.AddRepository<CorporateReport, CorporateReportRepository>();
             options.AddDefaultRepositories(includeAllEntities: true);
         });
 
-        if (AbpStudioAnalyzeHelper.IsInAnalyzeMode)
-        {
-            return;
-        }
+        //if (AbpStudioAnalyzeHelper.IsInAnalyzeMode)
+        //{
+        //    return;
+        //}
 
         Configure<AbpDbContextOptions>(options =>
         {

@@ -6,7 +6,6 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Volo.Abp.BackgroundJobs;
 using Volo.Abp.Json;
-using Volo.Abp.Uow;
 using Volo.Abp.Users;
 using Wallee.Mcp.CorporateInfos;
 using Wallee.Mcp.CorporateInfos.BackgroundJobs;
@@ -23,20 +22,17 @@ namespace Wallee.Mcp.Plugins
         private readonly IBackgroundJobManager _backgroundJobManager;
         private readonly ICorporateInfoRepository _corporateInfoRepository;
         private readonly ICurrentUser _currentUser;
-        private readonly IUnitOfWorkManager _unitOfWorkManager;
 
         public CorporateInfoPlugin(
             IBackgroundJobManager backgroundJobManager,
             ICorporateInfoRepository corporateInfoRepository,
             ICurrentUser currentUser,
-            IUnitOfWorkManager unitOfWorkManager,
             ITianYanChaCorporateInfoFetcher tianYanChaCorporateInfoFetcher,
             IJsonSerializer jsonSerializer)
         {
             _backgroundJobManager = backgroundJobManager;
             _corporateInfoRepository = corporateInfoRepository;
             _currentUser = currentUser;
-            _unitOfWorkManager = unitOfWorkManager;
             _tianYanChaCorporateInfoFetcher = tianYanChaCorporateInfoFetcher;
             _jsonSerializer = jsonSerializer;
         }
@@ -89,7 +85,7 @@ namespace Wallee.Mcp.Plugins
         [return: Description("返回发送结果")]
         public async Task<string> SendAsync(
         [Description("收件人,发送给谁")] string email,
-        [Description("统一社会信用代码证号或简称代码证号")] string creditCode)
+        [Description("统一社会信用代码证号")] string creditCode)
         {
 
             if (!CheckEmail(email))
@@ -111,21 +107,18 @@ namespace Wallee.Mcp.Plugins
 
             var corporateInfo = await _corporateInfoRepository.FindAsync(it => it.CreditCode == creditCode);
 
-            using var uow = _unitOfWorkManager.Begin();
             if (corporateInfo == default)
             {
                 await _backgroundJobManager.EnqueueAsync(new FetchCorporateInfoJobArgs
                 {
                     CreditCode = creditCode,
                     GenerateCorporateReportJobArgs = generateCorporateReportJobArgs
-                });
+                }, delay: TimeSpan.FromSeconds(5));
             }
             else
             {
-                await _backgroundJobManager.EnqueueAsync(generateCorporateReportJobArgs, delay: TimeSpan.FromSeconds(1));
+                await _backgroundJobManager.EnqueueAsync(generateCorporateReportJobArgs, delay: TimeSpan.FromSeconds(5));
             }
-
-            await uow.SaveChangesAsync();
 
             return $"(信用代码证号){creditCode},后台正在处理，稍后你会收到一封关于企业信息的PDF邮件，请留意你的邮箱";
         }
