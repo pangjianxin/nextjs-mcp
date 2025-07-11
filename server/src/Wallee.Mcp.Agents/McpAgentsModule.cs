@@ -133,6 +133,24 @@ namespace Wallee.Mcp
 
                     //HistoryReducer = new ChatHistoryTruncationReducer(3, 3)
                     HistoryReducer = new ChatHistorySummarizationReducer(chatService, 3, 3)
+                    {
+                        SummarizationInstructions = """
+                    请提供一个简洁完整的对话总结，不超过5句话。该总结必须始终：
+                    - 考虑用户和助手的互动
+                    - 保持连贯性以利于后续对话
+                    - 包含现有总结中的细节
+                    - 着重于对话中最重要的方面
+
+                    该总结绝不能：
+                    - 批评、纠正、解释、推测或假设
+                    - 指出错误、失误、误解或正确性
+                    - 分析未发生的事情
+                    - 排除现有总结中的细节
+
+                    如果用户的对话涉及到企业信息查询或报告发送，请确保总结中包含以下内容：
+                    - 用户查询的企业名称或统一社会信用代码
+                    """
+                    },
                 };
                 return agent;
             });

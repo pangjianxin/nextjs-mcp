@@ -1,406 +1,556 @@
-"use client";
+"use client"
 
-import type React from "react";
-import { useState, useEffect, useRef, useCallback } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Send, Bot, User, Loader2, Circle, Zap } from "lucide-react";
-import { MarkdownRenderer } from "@/components/sections/markdown-renderer";
-import { useSignalRChat, type ChatMessage } from "@/hooks/use-signalr-chat-2";
+import type React from "react"
+import { useState, useEffect, useRef } from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Card } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { useSSEChat } from "@/hooks/use-sse-chat"
+import { Send, Square, Trash2, Bot, User, Zap, Copy, Check, Sparkles, Brain, Cpu } from "lucide-react"
+import { cn } from "@/lib/utils"
+import { MarkdownRenderer } from "@/components/sections/markdown-renderer"
 
-interface SignalRChatProps {
-  hubUrl: string;
-  className?: string;
+// 错误提示组件 - 保持科技感风格
+function ErrorAlert({ error, onDismiss }: { error: any; onDismiss: () => void }) {
+  const getErrorIcon = (type: string) => {
+    switch (type) {
+      case "AUTH_ERROR":
+        return "🔐"
+      case "NETWORK_ERROR":
+        return "🌐"
+      case "SERVER_ERROR":
+        return "⚠️"
+      case "VALIDATION_ERROR":
+        return "📝"
+      case "STREAM_ERROR":
+        return "📡"
+      default:
+        return "❌"
+    }
+  }
+
+  const getErrorGradient = (type: string) => {
+    switch (type) {
+      case "AUTH_ERROR":
+        return "from-yellow-500/20 via-orange-500/20 to-red-500/20"
+      case "NETWORK_ERROR":
+        return "from-blue-500/20 via-cyan-500/20 to-teal-500/20"
+      case "SERVER_ERROR":
+        return "from-red-500/20 via-pink-500/20 to-rose-500/20"
+      case "VALIDATION_ERROR":
+        return "from-purple-500/20 via-indigo-500/20 to-blue-500/20"
+      case "STREAM_ERROR":
+        return "from-gray-500/20 via-slate-500/20 to-zinc-500/20"
+      default:
+        return "from-red-500/20 via-pink-500/20 to-rose-500/20"
+    }
+  }
+
+  const getBorderColor = (type: string) => {
+    switch (type) {
+      case "AUTH_ERROR":
+        return "border-yellow-400/50"
+      case "NETWORK_ERROR":
+        return "border-cyan-400/50"
+      case "SERVER_ERROR":
+        return "border-red-400/50"
+      case "VALIDATION_ERROR":
+        return "border-purple-400/50"
+      case "STREAM_ERROR":
+        return "border-gray-400/50"
+      default:
+        return "border-red-400/50"
+    }
+  }
+
+  return (
+    <div
+      className={cn(
+        "mb-6 rounded-2xl backdrop-blur-xl border-2 shadow-2xl transition-all duration-500 animate-in slide-in-from-top-4",
+        `bg-gradient-to-br ${getErrorGradient(error.type)}`,
+        getBorderColor(error.type),
+      )}
+    >
+      <div className="p-6 flex items-start justify-between gap-4">
+        <div className="flex items-start gap-4">
+          <div className="relative">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-red-400/30 via-pink-500/30 to-purple-600/30 flex items-center justify-center backdrop-blur-xl shadow-2xl border-2 border-red-400/50">
+              <span className="text-2xl">{getErrorIcon(error.type)}</span>
+            </div>
+            <div className="absolute inset-0 rounded-2xl border-2 border-red-400/30 animate-ping"></div>
+          </div>
+          <div>
+            <h4 className="text-xl font-bold bg-gradient-to-r from-red-400 via-pink-400 to-purple-400 bg-clip-text text-transparent mb-2">
+              {error.type === "AUTH_ERROR" && "🔐 认证错误"}
+              {error.type === "NETWORK_ERROR" && "🌐 网络错误"}
+              {error.type === "SERVER_ERROR" && "⚠️ 服务器错误"}
+              {error.type === "VALIDATION_ERROR" && "📝 输入错误"}
+              {error.type === "STREAM_ERROR" && "📡 连接错误"}
+              {!["AUTH_ERROR", "NETWORK_ERROR", "SERVER_ERROR", "VALIDATION_ERROR", "STREAM_ERROR"].includes(
+                error.type,
+              ) && "❌ 未知错误"}
+            </h4>
+            <p className="text-gray-200 text-base leading-relaxed">{error.message}</p>
+            <p className="text-cyan-400 text-sm mt-2 font-medium">⏰ {new Date(error.timestamp).toLocaleString()}</p>
+          </div>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onDismiss}
+          className="text-red-400 hover:text-red-300 hover:bg-red-500/20 transition-all duration-200 hover:scale-110 border-2 border-red-400/30 hover:border-red-300/50 rounded-xl"
+        >
+          ✕
+        </Button>
+      </div>
+      {/* 科技感装饰线条 */}
+      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-red-400/50 to-transparent"></div>
+      <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-purple-400/50 to-transparent"></div>
+    </div>
+  )
 }
 
-export function SignalRChat({ hubUrl, className = "" }: SignalRChatProps) {
-  const [inputMessage, setInputMessage] = useState("");
+// 科技感打字动画组件
+function TypingAnimation() {
+  return (
+    <div className="flex space-x-2 items-center">
+      <div className="flex space-x-1">
+        <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce [animation-delay:-0.3s] shadow-lg shadow-cyan-400/80"></div>
+        <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce [animation-delay:-0.15s] shadow-lg shadow-blue-400/80"></div>
+        <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce shadow-lg shadow-purple-400/80"></div>
+      </div>
+      <div className="flex items-center gap-1">
+        <Brain className="w-3 h-3 text-cyan-400 animate-pulse" />
+        <span className="text-sm bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent font-medium">
+          AI神经网络处理中...
+        </span>
+      </div>
+    </div>
+  )
+}
+
+// 科技感消息气泡组件
+function MessageBubble({ message, isUser }: { message: any; isUser: boolean }) {
+  const [isVisible, setIsVisible] = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
+  const [copied, setCopied] = useState(false)
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsVisible(true), 100)
+    return () => clearTimeout(timer)
+  }, [])
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(message.content)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch (err) {
+      console.error("Failed to copy text: ", err)
+    }
+  }
+
+  return (
+    <div
+      className={cn(
+        "flex items-start gap-4 transition-all duration-700 transform mb-6",
+        isUser ? "justify-end" : "justify-start",
+        isVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0",
+      )}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {!isUser && (
+        <div className="relative">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 flex items-center justify-center shadow-2xl shadow-cyan-500/50 ring-2 ring-cyan-400/60 transition-all duration-300 hover:scale-110 hover:rotate-3 hover:shadow-cyan-400/70">
+            <Bot className="w-6 h-6 text-white drop-shadow-lg" />
+          </div>
+          <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full border-2 border-black animate-pulse shadow-lg shadow-green-400/80"></div>
+          {/* AI脉冲环 */}
+          <div className="absolute inset-0 rounded-2xl border-2 border-cyan-400/30 animate-ping"></div>
+        </div>
+      )}
+
+      <div className="relative group max-w-[85%]">
+        <div
+          className={cn(
+            "rounded-2xl px-4 py-2 transition-all duration-500 backdrop-blur-xl border-2",
+            "hover:scale-[1.02] hover:shadow-2xl",
+            isUser
+              ? "bg-gradient-to-br from-blue-600/90 via-indigo-700/90 to-purple-800/90 text-white shadow-2xl shadow-blue-500/40 border-blue-400/60 hover:shadow-blue-400/60 hover:border-blue-300/80"
+              : "bg-gradient-to-br from-gray-900/95 via-slate-800/95 to-gray-900/95 text-gray-100 shadow-2xl shadow-cyan-500/20 border-cyan-500/40 hover:border-cyan-400/60 hover:shadow-cyan-400/30",
+            isHovered && (isUser ? "ring-2 ring-blue-400/60 glow-blue" : "ring-2 ring-cyan-400/60 glow-cyan"),
+          )}
+        >
+          {/* 流式状态指示器 */}
+          {message.isStreaming && (
+            <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center gap-2">
+                <div className="relative">
+                  <div className="w-3 h-3 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full animate-pulse shadow-lg shadow-green-400/80"></div>
+                  <div className="absolute inset-0 w-3 h-3 bg-green-400 rounded-full animate-ping opacity-30"></div>
+                </div>
+                <Cpu className="w-3 h-3 text-cyan-400 animate-spin" />
+                <span className="text-xs bg-gradient-to-r from-green-400 to-cyan-400 bg-clip-text text-transparent font-bold">
+                  实时AI流式响应
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* 消息内容 - 使用Markdown渲染 */}
+          <div className="prose prose-invert prose-sm max-w-none">
+            <MarkdownRenderer content={message.content} />
+          </div>
+
+          {/* 消息元数据 */}
+          {message.usage && (
+            <div className="mt-4 pt-3 border-t border-cyan-400/20 flex items-center justify-between">
+              <div className="flex items-center gap-3 text-xs">
+                <div className="flex items-center gap-1 text-yellow-400">
+                  <Zap className="w-3 h-3 animate-pulse" />
+                  <span className="font-bold">{message.usage.totalTokenCount}</span>
+                  <span className="text-cyan-400">tokens</span>
+                </div>
+                <div className="w-1 h-1 bg-cyan-400 rounded-full animate-pulse"></div>
+                <span className="text-purple-400 font-medium">{message.modelId}</span>
+              </div>
+              <div className="text-xs text-gray-400">{new Date(message.timestamp).toLocaleTimeString()}</div>
+            </div>
+          )}
+
+          {/* 科技感装饰线条 */}
+          <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent"></div>
+          <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-purple-400/50 to-transparent"></div>
+        </div>
+
+        {/* 炫酷的复制按钮 */}
+        <div
+          className={cn(
+            "absolute -bottom-3 right-4 transition-all duration-300",
+            isHovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2 pointer-events-none",
+          )}
+        >
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleCopy}
+            className={cn(
+              "h-8 w-8 p-0 rounded-full backdrop-blur-xl border-2 transition-all duration-200 hover:scale-110",
+              copied
+                ? "bg-green-500/30 border-green-400/80 text-green-400 shadow-lg shadow-green-400/50"
+                : "bg-gray-800/80 border-cyan-400/50 text-cyan-400 hover:bg-gray-700/80 hover:border-cyan-300/70 hover:shadow-lg hover:shadow-cyan-400/30",
+            )}
+          >
+            {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+          </Button>
+        </div>
+      </div>
+
+      {isUser && (
+        <div className="relative">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-400 via-green-500 to-teal-600 flex items-center justify-center shadow-2xl shadow-emerald-500/50 ring-2 ring-emerald-400/60 transition-all duration-300 hover:scale-110 hover:rotate-3 hover:shadow-emerald-400/70">
+            <User className="w-6 h-6 text-white drop-shadow-lg" />
+          </div>
+          <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-full border-2 border-black shadow-lg shadow-blue-400/80"></div>
+          {/* 用户脉冲环 */}
+          <div className="absolute inset-0 rounded-2xl border-2 border-emerald-400/30 animate-ping"></div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export function SimpleChatInterface() {
+  const [inputMessage, setInputMessage] = useState("")
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const messagesContainerRef = useRef<HTMLDivElement>(null)
 
   const {
     messages,
     currentStreamingMessage,
-    isConnected,
     isLoading,
     totalTokens,
+    error,
+    connectionStatus,
     sendMessage,
     clearMessages,
-  } = useSignalRChat({ hubUrl });
+    stopStreaming,
+    clearError,
+  } = useSSEChat()
 
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  // 滚动到底部
-  const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, []);
-
-  // 处理发送消息
   const handleSendMessage = async () => {
-    if (!inputMessage.trim()) return;
+    if (!inputMessage.trim()) return
+    await sendMessage(inputMessage)
+    setInputMessage("")
+  }
 
-    await sendMessage(inputMessage);
-    setInputMessage("");
-  };
-
-  // 处理回车发送
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
+      e.preventDefault()
+      handleSendMessage()
     }
-  };
+  }
 
-  // 自动滚动到底部
+  const allMessages = [...messages]
+  if (currentStreamingMessage) {
+    allMessages.push(currentStreamingMessage)
+  }
+
+  const scrollToBottom = () => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" })
+    }
+  }
+
   useEffect(() => {
-    scrollToBottom();
-  }, [messages, currentStreamingMessage, scrollToBottom]);
-
-  // 格式化token数量
-  const formatTokenCount = (count: number) => {
-    if (count >= 1000) {
-      return `${(count / 1000).toFixed(1)}k`;
-    }
-    return count.toString();
-  };
-
-  // 渲染消息
-  const renderMessage = (message: ChatMessage) => (
-    <div
-      key={message.id}
-      className={`flex gap-4 items-start animate-in slide-in-from-bottom-2 duration-300 ${
-        message.role === "user" ? "justify-end" : "justify-start"
-      }`}
-    >
-      {message.role === "assistant" && (
-        <Avatar className="h-8 w-8 flex-shrink-0 ring-2 ring-slate-200 dark:ring-slate-700">
-          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white">
-            <Bot className="h-4 w-4" />
-          </AvatarFallback>
-        </Avatar>
-      )}
-
-      <div
-        className={`group ${
-          message.role === "user" ? "order-first max-w-[70%]" : "max-w-[80%]"
-        }`}
-      >
-        <div
-          className={`relative px-4 py-3 rounded-2xl shadow-sm transition-all duration-200 ${
-            message.role === "user"
-              ? "bg-gradient-to-br from-blue-500 to-blue-600 text-white ml-auto"
-              : "bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700"
-          }`}
-        >
-          {message.role === "user" ? (
-            <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
-              {message.content}
-            </p>
-          ) : (
-            <div className="prose prose-sm max-w-none dark:prose-invert">
-              <MarkdownRenderer content={message.content} />
-            </div>
-          )}
-
-          {/* 消息尾巴 */}
-          <div
-            className={`absolute top-3 w-3 h-3 transform rotate-45 ${
-              message.role === "user"
-                ? "-right-1 bg-gradient-to-br from-blue-500 to-blue-600"
-                : "-left-1 bg-white dark:bg-slate-800 border-l border-b border-slate-200 dark:border-slate-700"
-            }`}
-          />
-        </div>
-
-        <div
-          className={`flex items-center gap-2 mt-2 px-2 ${
-            message.role === "user" ? "justify-end" : "justify-start"
-          }`}
-        >
-          <p className="text-xs text-slate-400 dark:text-slate-500">
-            {message.timestamp.toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
-          </p>
-
-          {/* Token使用情况 - 只显示AI消息的token信息 */}
-          {message.role === "assistant" &&
-            message.usage &&
-            message.isComplete && (
-              <>
-                <span className="text-xs text-slate-300 dark:text-slate-600">
-                  •
-                </span>
-                <div className="flex items-center gap-1 text-xs text-slate-400 dark:text-slate-500">
-                  <Zap className="h-3 w-3" />
-                  <span
-                    title={`输入: ${message.usage.inputTokenCount} | 输出: ${message.usage.outputTokenCount}`}
-                  >
-                    {formatTokenCount(message.usage.totalTokenCount)} tokens
-                  </span>
-                </div>
-                {message.modelId && (
-                  <>
-                    <span className="text-xs text-slate-300 dark:text-slate-600">
-                      •
-                    </span>
-                    <span className="text-xs text-slate-400 dark:text-slate-500">
-                      {message.modelId}
-                    </span>
-                  </>
-                )}
-              </>
-            )}
-        </div>
-      </div>
-
-      {message.role === "user" && (
-        <Avatar className="h-8 w-8 flex-shrink-0 ring-2 ring-blue-200 dark:ring-blue-800">
-          <AvatarFallback className="bg-gradient-to-br from-slate-600 to-slate-700 text-white">
-            <User className="h-4 w-4" />
-          </AvatarFallback>
-        </Avatar>
-      )}
-    </div>
-  );
-
-  // 渲染流式消息
-  const renderStreamingMessage = () => {
-    if (!currentStreamingMessage) return null;
-
-    return (
-      <div className="flex gap-4 items-start animate-in slide-in-from-bottom-2 duration-300">
-        <Avatar className="h-8 w-8 flex-shrink-0 ring-2 ring-slate-200 dark:ring-slate-700">
-          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white">
-            <Bot className="h-4 w-4" />
-          </AvatarFallback>
-        </Avatar>
-
-        <div className="max-w-[80%]">
-          <div className="relative px-4 py-3 rounded-2xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 shadow-sm">
-            <div className="prose prose-sm max-w-none dark:prose-invert">
-              <MarkdownRenderer content={currentStreamingMessage.content} />
-            </div>
-
-            {currentStreamingMessage.isStreaming && (
-              <div className="flex items-center gap-2 mt-3 pt-2 border-t border-slate-100 dark:border-slate-700">
-                <div className="flex gap-1">
-                  <div
-                    className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"
-                    style={{ animationDelay: "0ms" }}
-                  />
-                  <div
-                    className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"
-                    style={{ animationDelay: "150ms" }}
-                  />
-                  <div
-                    className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"
-                    style={{ animationDelay: "300ms" }}
-                  />
-                </div>
-                <span className="text-xs text-slate-500 dark:text-slate-400">
-                  正在输入...
-                </span>
-              </div>
-            )}
-
-            {/* 消息尾巴 */}
-            <div className="absolute top-3 -left-1 w-3 h-3 bg-white dark:bg-slate-800 border-l border-b border-slate-200 dark:border-slate-700 transform rotate-45" />
-          </div>
-
-          <div className="flex items-center gap-2 mt-2 px-2">
-            <p className="text-xs text-slate-400 dark:text-slate-500">
-              {currentStreamingMessage.timestamp.toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </p>
-
-            {/* 流式消息的token信息 - 只在完成时显示 */}
-            {currentStreamingMessage.usage &&
-              currentStreamingMessage.isComplete && (
-                <>
-                  <span className="text-xs text-slate-300 dark:text-slate-600">
-                    •
-                  </span>
-                  <div className="flex items-center gap-1 text-xs text-slate-400 dark:text-slate-500">
-                    <Zap className="h-3 w-3" />
-                    <span
-                      title={`输入: ${currentStreamingMessage.usage.inputTokenCount} | 输出: ${currentStreamingMessage.usage.outputTokenCount}`}
-                    >
-                      {formatTokenCount(
-                        currentStreamingMessage.usage.totalTokenCount
-                      )}{" "}
-                      tokens
-                    </span>
-                  </div>
-                  {currentStreamingMessage.modelId && (
-                    <>
-                      <span className="text-xs text-slate-300 dark:text-slate-600">
-                        •
-                      </span>
-                      <span className="text-xs text-slate-400 dark:text-slate-500">
-                        {currentStreamingMessage.modelId}
-                      </span>
-                    </>
-                  )}
-                </>
-              )}
-          </div>
-        </div>
-      </div>
-    );
-  };
+    scrollToBottom()
+  }, [allMessages])
 
   return (
-    <div
-      className={`flex flex-col w-4xl mx-auto h-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 ${className}`}
-    >
-      {/* 头部 */}
-      <div className="flex-shrink-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-slate-200/50 dark:border-slate-700/50">
-        <div className="flex items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-3">
+    <div className="container mx-auto max-w-6xl h-full flex flex-col relative">
+      {/* 超炫酷的AI背景效果 */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 rounded-3xl"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-cyan-500/20 via-blue-600/10 to-transparent rounded-3xl"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-purple-600/20 via-pink-500/10 to-transparent rounded-3xl"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-500/5 via-transparent to-transparent rounded-3xl"></div>
+
+      {/* 动态光效 */}
+      <div className="absolute top-10 left-1/4 w-96 h-96 bg-cyan-400/10 rounded-full blur-3xl animate-pulse"></div>
+      <div className="absolute bottom-10 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse [animation-delay:1s]"></div>
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-blue-500/5 rounded-full blur-2xl animate-pulse [animation-delay:2s]"></div>
+
+      {/* 科技网格背景 */}
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(6,182,212,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(6,182,212,0.03)_1px,transparent_1px)] bg-[size:50px_50px] rounded-3xl"></div>
+
+      <div className="relative z-10 flex flex-col h-full">
+        {/* 超炫酷的AI标题区域 */}
+        <div className="text-center py-6 border-b-2 border-cyan-500/30 bg-gradient-to-r from-slate-900/80 via-gray-900/80 to-slate-900/80 backdrop-blur-xl rounded-t-3xl shadow-2xl shadow-cyan-500/10">
+          <div className="flex items-center justify-center gap-4 mb-3">
             <div className="relative">
-              <Avatar className="h-10 w-10 ring-2 ring-blue-500/20">
-                <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white">
-                  <Bot className="h-5 w-5" />
-                </AvatarFallback>
-              </Avatar>
-              <div
-                className={`absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-white dark:border-slate-900 ${
-                  isConnected ? "bg-green-500" : "bg-red-500"
-                }`}
-              />
-            </div>
-            <div>
-              <h1 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-                企业信息分析
-              </h1>
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                {isConnected ? "在线" : "离线"} • 智能助手
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Circle
-              className={`h-2 w-2 ${
-                isConnected
-                  ? "fill-green-500 text-green-500"
-                  : "fill-red-500 text-red-500"
-              }`}
-            />
-            <span className="text-xs text-slate-500 dark:text-slate-400">
-              {isConnected ? "已连接" : "未连接"}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* 消息区域 */}
-      <div className="flex-1 overflow-y-auto px-4 py-6" ref={scrollAreaRef}>
-        <div className="max-w-4xl mx-auto space-y-6">
-          {messages.length === 0 && (
-            <div className="text-center py-12">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 mb-4">
-                <Bot className="h-8 w-8 text-white" />
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 flex items-center justify-center shadow-2xl shadow-cyan-500/50">
+                <Sparkles className="w-5 h-5 text-white animate-pulse" />
               </div>
-              <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100 mb-2">
-                开始对话
-              </h3>
-              <p className="text-slate-500 dark:text-slate-400">
-                向我提问任何问题，我会尽力帮助你
-              </p>
+              <div className="absolute inset-0 rounded-xl border-2 border-cyan-400/50 animate-ping"></div>
             </div>
-          )}
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-500 bg-clip-text text-transparent drop-shadow-2xl">
+              🤖 AI 超级智能助手
+            </h1>
+            <div className="relative">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 via-pink-500 to-red-500 flex items-center justify-center shadow-2xl shadow-purple-500/50">
+                <Brain className="w-5 h-5 text-white animate-pulse" />
+              </div>
+              <div className="absolute inset-0 rounded-xl border-2 border-purple-400/50 animate-ping [animation-delay:0.5s]"></div>
+            </div>
+          </div>
+          <p className="text-cyan-300 text-base font-medium">
+            🚀{" "}
+            <span className="bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">智能对话</span>{" "}
+            • ⚡{" "}
+            <span className="bg-gradient-to-r from-blue-400 to-pink-400 bg-clip-text text-transparent">实时响应</span> •
+            📝{" "}
+            <span className="bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
+              Markdown支持
+            </span>
+          </p>
+        </div>
 
-          {messages.map(renderMessage)}
-          {renderStreamingMessage()}
-
-          {/* 加载指示器 */}
-          {isLoading && !currentStreamingMessage && (
-            <div className="flex gap-4 items-start animate-in slide-in-from-bottom-2 duration-300">
-              <Avatar className="h-8 w-8 flex-shrink-0 ring-2 ring-slate-200 dark:ring-slate-700">
-                <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white">
-                  <Bot className="h-4 w-4" />
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex items-center gap-3 bg-white dark:bg-slate-800 rounded-2xl px-4 py-3 border border-slate-200 dark:border-slate-700 shadow-sm">
-                <div className="flex gap-1">
+        {/* 超炫酷的聊天区域 */}
+        <Card className="flex-1 bg-gradient-to-br from-slate-900/50 via-gray-900/50 to-black/50 backdrop-blur-2xl border-2 border-cyan-500/30 shadow-2xl shadow-cyan-500/20 overflow-hidden rounded-b-3xl border-t-0">
+          {/* 科技感状态栏 */}
+          <div className="flex items-center justify-between p-4 border-b-2 border-cyan-500/20 bg-gradient-to-r from-slate-900/70 via-gray-900/70 to-slate-900/70 backdrop-blur-xl">
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-3">
+                <div className="relative">
                   <div
-                    className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"
-                    style={{ animationDelay: "0ms" }}
-                  />
+                    className={cn(
+                      "w-4 h-4 rounded-full animate-pulse shadow-lg",
+                      connectionStatus === "connected"
+                        ? "bg-gradient-to-r from-green-400 to-emerald-500 shadow-green-400/80"
+                        : connectionStatus === "error"
+                          ? "bg-gradient-to-r from-red-400 to-pink-500 shadow-red-400/80"
+                          : "bg-gradient-to-r from-yellow-400 to-orange-500 shadow-yellow-400/80",
+                    )}
+                  ></div>
                   <div
-                    className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"
-                    style={{ animationDelay: "150ms" }}
-                  />
-                  <div
-                    className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"
-                    style={{ animationDelay: "300ms" }}
-                  />
+                    className={cn(
+                      "absolute inset-0 w-4 h-4 rounded-full animate-ping opacity-30",
+                      connectionStatus === "connected"
+                        ? "bg-green-400"
+                        : connectionStatus === "error"
+                          ? "bg-red-400"
+                          : "bg-yellow-400",
+                    )}
+                  ></div>
                 </div>
-                <span className="text-sm text-slate-600 dark:text-slate-400">
-                  AI正在思考...
+                <span className="text-sm text-cyan-300 font-bold">
+                  {connectionStatus === "connected" && "🌐 智能助手在线"}
+                  {connectionStatus === "error" && "⚠️ 连接异常"}
+                  {connectionStatus === "disconnected" && "🔌 等待连接"}
                 </span>
               </div>
+              <div className="h-6 w-px bg-gradient-to-b from-cyan-400/50 to-purple-400/50"></div>
+              <div className="flex items-center gap-2">
+                <Cpu className="w-4 h-4 text-purple-400 animate-spin" />
+                <span className="text-sm text-purple-300 font-medium">{allMessages.length} 条对话</span>
+              </div>
             </div>
-          )}
-        </div>
-        <div ref={messagesEndRef} />
-      </div>
 
-      {/* 输入区域 */}
-      <div className="flex-shrink-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-t border-slate-200/50 dark:border-slate-700/50">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex gap-3 items-end">
-            <div className="flex-1 relative">
-              <Input
-                value={inputMessage}
-                onChange={(e) => setInputMessage(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder={isConnected ? "输入消息..." : "连接中..."}
-                disabled={!isConnected || isLoading}
-                className="min-h-[48px] pr-12 rounded-2xl border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-              />
+            <div className="flex items-center gap-4">
+              <Badge className="bg-gradient-to-r from-cyan-500/30 to-purple-500/30 text-cyan-200 border-2 border-cyan-400/50 shadow-lg shadow-cyan-500/30 px-3 py-1">
+                <Zap className="w-4 h-4 mr-2 text-yellow-400 animate-pulse" />
+                <span className="font-bold text-yellow-300">{totalTokens.toLocaleString()}</span>
+                <span className="ml-1 text-cyan-300">Tokens</span>
+              </Badge>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearMessages}
+                className="text-red-400 hover:text-red-300 hover:bg-red-500/20 transition-all duration-200 hover:scale-110 border-2 border-red-400/30 hover:border-red-300/50 rounded-xl"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
             </div>
-            <Button
-              onClick={handleSendMessage}
-              disabled={!isConnected || !inputMessage.trim() || isLoading}
-              size="icon"
-              className="h-12 w-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 shadow-lg hover:shadow-xl transition-all duration-200"
-            >
-              {isLoading ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                <Send className="h-5 w-5" />
-              )}
-            </Button>
           </div>
 
-          <div className="flex items-center justify-between mt-2 px-2">
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              按 Enter 发送消息，Shift + Enter 换行
-            </p>
-            {messages.length > 0 && (
-              <div className="flex items-center gap-3 text-xs text-slate-400 dark:text-slate-500">
-                <span>{messages.length} 条消息</span>
-                {totalTokens > 0 && (
-                  <>
-                    <span>•</span>
-                    <div className="flex items-center gap-1">
-                      <Zap className="h-3 w-3" />
-                      <span>总计 {formatTokenCount(totalTokens)} tokens</span>
+          {/* 消息列表 - 科技感滚动区域 */}
+          <div className="flex-1 flex flex-col min-h-0">
+            <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-6 scrollbar-cyber">
+              <div className="space-y-4">
+                {/* 错误提示 */}
+                {error && <ErrorAlert error={error} onDismiss={clearError} />}
+
+                {allMessages.length === 0 && !error && (
+                  <div className="text-center py-20">
+                    <div className="relative w-24 h-24 mx-auto mb-8">
+                      <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-cyan-400/30 via-blue-500/30 to-purple-600/30 flex items-center justify-center backdrop-blur-xl shadow-2xl shadow-cyan-500/30 border-2 border-cyan-400/50">
+                        <Bot className="w-12 h-12 text-cyan-300" />
+                      </div>
+                      <div className="absolute inset-0 rounded-3xl border-2 border-cyan-400/30 animate-ping"></div>
+                      <div className="absolute inset-0 rounded-3xl border-2 border-purple-400/30 animate-ping [animation-delay:0.5s]"></div>
                     </div>
-                  </>
+                    <h3 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-500 bg-clip-text text-transparent mb-4">
+                      🚀 启动AI智能对话
+                    </h3>
+                    <p className="text-cyan-200 max-w-md mx-auto text-lg leading-relaxed">
+                      向AI助手提问任何问题，体验
+                      <span className="text-purple-400 font-bold">超级智能</span>
+                      对话的魅力。 支持
+                      <span className="text-cyan-400 font-bold">Markdown格式</span>，
+                      <span className="text-blue-400 font-bold">代码高亮</span>
+                      等丰富功能。
+                    </p>
+                  </div>
+                )}
+
+                {allMessages.map((message) => (
+                  <MessageBubble key={message.id} message={message} isUser={message.role === "user"} />
+                ))}
+
+                {isLoading && !currentStreamingMessage && (
+                  <div className="flex justify-start mb-6">
+                    <div className="flex items-center gap-4">
+                      <div className="relative">
+                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 flex items-center justify-center shadow-2xl shadow-cyan-500/50 animate-pulse">
+                          <Bot className="w-6 h-6 text-white" />
+                        </div>
+                        <div className="absolute inset-0 rounded-2xl border-2 border-cyan-400/50 animate-ping"></div>
+                      </div>
+                      <div className="bg-gradient-to-br from-slate-900/95 via-gray-800/95 to-slate-900/95 border-2 border-cyan-500/40 rounded-2xl px-6 py-4 shadow-2xl shadow-cyan-500/20 backdrop-blur-xl">
+                        <TypingAnimation />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div ref={messagesEndRef} />
+              </div>
+            </div>
+
+            {/* 超炫酷的输入区域 */}
+            <div className="p-6 border-t-2 border-cyan-500/20 bg-gradient-to-r from-slate-900/80 via-gray-900/80 to-slate-900/80 backdrop-blur-xl">
+              <div className="flex gap-4">
+                <div className="flex-1 relative">
+                  <Input
+                    value={inputMessage}
+                    onChange={(e) => setInputMessage(e.target.value)}
+                    onKeyDown={handleKeyPress}
+                    placeholder="🤖 输入你的消息，开启AI智能对话..."
+                    disabled={isLoading}
+                    className="bg-gradient-to-r from-gray-800/80 to-slate-800/80 border-2 border-cyan-500/40 text-white placeholder-cyan-300/70 focus:border-cyan-400/80 focus:ring-cyan-400/30 backdrop-blur-sm h-14 text-base rounded-2xl px-6 pr-16 shadow-2xl shadow-cyan-500/10 transition-all duration-200 hover:bg-gray-700/80 hover:border-cyan-400/60"
+                  />
+                  <div className="absolute right-4 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
+                    <div className="w-3 h-3 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full animate-pulse shadow-lg shadow-cyan-400/80"></div>
+                    <Cpu className="w-4 h-4 text-cyan-400 animate-spin" />
+                  </div>
+                </div>
+
+                {isLoading ? (
+                  <Button
+                    onClick={stopStreaming}
+                    className="bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white shadow-2xl shadow-red-500/40 h-14 px-8 rounded-2xl transition-all duration-200 hover:scale-105 border-2 border-red-400/50 hover:border-red-300/70"
+                  >
+                    <Square className="h-5 w-5" />
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleSendMessage}
+                    disabled={!inputMessage.trim()}
+                    className="bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600 hover:from-cyan-400 hover:via-blue-500 hover:to-purple-500 text-white shadow-2xl shadow-cyan-500/40 h-14 px-8 rounded-2xl transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed border-2 border-cyan-400/50 hover:border-cyan-300/70"
+                  >
+                    <Send className="h-5 w-5" />
+                  </Button>
                 )}
               </div>
-            )}
+
+              {/* 超炫酷的快捷建议 */}
+              <div className="flex flex-wrap gap-3 mt-6">
+                {[
+                  {
+                    text: "解释AI概念",
+                    icon: "🧠",
+                    gradient: "from-cyan-500/20 to-blue-600/20 hover:from-cyan-400/30 hover:to-blue-500/30",
+                    border: "border-cyan-400/40 hover:border-cyan-300/60",
+                  },
+                  {
+                    text: "编写代码",
+                    icon: "💻",
+                    gradient: "from-purple-500/20 to-pink-600/20 hover:from-purple-400/30 hover:to-pink-500/30",
+                    border: "border-purple-400/40 hover:border-purple-300/60",
+                  },
+                  {
+                    text: "翻译文本",
+                    icon: "🌐",
+                    gradient: "from-green-500/20 to-emerald-600/20 hover:from-green-400/30 hover:to-emerald-500/30",
+                    border: "border-green-400/40 hover:border-green-300/60",
+                  },
+                  {
+                    text: "创意灵感",
+                    icon: "💡",
+                    gradient: "from-yellow-500/20 to-orange-600/20 hover:from-yellow-400/30 hover:to-orange-500/30",
+                    border: "border-yellow-400/40 hover:border-yellow-300/60",
+                  },
+                ].map((suggestion) => (
+                  <button
+                    key={suggestion.text}
+                    onClick={() => setInputMessage(suggestion.text)}
+                    className={cn(
+                      "px-5 py-3 text-sm font-medium rounded-xl transition-all duration-200 hover:scale-105 backdrop-blur-sm shadow-lg border-2",
+                      `bg-gradient-to-r ${suggestion.gradient}`,
+                      `${suggestion.border}`,
+                      "text-white hover:shadow-xl",
+                    )}
+                  >
+                    <span className="mr-2 text-base">{suggestion.icon}</span>
+                    {suggestion.text}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
-        </div>
+        </Card>
       </div>
     </div>
-  );
+  )
 }
-
-

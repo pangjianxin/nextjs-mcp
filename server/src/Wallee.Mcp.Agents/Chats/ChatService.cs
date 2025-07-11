@@ -2,6 +2,7 @@
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Agents;
 using Microsoft.SemanticKernel.ChatCompletion;
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -44,6 +45,10 @@ namespace Wallee.Mcp.Chats
             await chatHistory.SetAsync(key, new ChatHistoryCache
             {
                 History = chatHistoryAgentThread.ChatHistory
+            },
+            new Microsoft.Extensions.Caching.Distributed.DistributedCacheEntryOptions
+            {
+                SlidingExpiration = TimeSpan.FromMinutes(10)
             }, token: cancellationToken);
         }
     }

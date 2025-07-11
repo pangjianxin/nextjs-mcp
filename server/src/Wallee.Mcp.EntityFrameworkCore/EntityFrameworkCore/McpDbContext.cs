@@ -160,7 +160,8 @@ public class McpDbContext :
             builder.ToTable(McpConsts.DbTablePrefix + "CorporateReports", McpConsts.DbSchema, table => table.HasComment("企业报告信息"));
             builder.ConfigureByConvention();
             builder.HasKey(e => e.Id);
-            builder.HasAlternateKey(e => new { e.CompanyName, e.CompanyUniscId });
+            builder.HasIndex(e => new { e.CompanyName, e.CompanyUniscId });
+            //builder.HasAlternateKey(e => new { e.CompanyName, e.CompanyUniscId });
             builder.Property(it => it.CompanyName).HasMaxLength(128).IsRequired();
             builder.Property(it => it.CompanyUniscId).HasMaxLength(32).IsRequired();
             builder.Property(it => it.DocumentName).HasMaxLength(256);

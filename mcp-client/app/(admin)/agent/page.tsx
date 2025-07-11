@@ -4,7 +4,7 @@
 //   return <SignalRChat hubUrl={process.env.SIGNALR_CHAT_URL as string} />;
 // }
 
-import { SimpleChatInterface } from "@/components/agent/agent2";
+import { SimpleChatInterface } from "@/components/agent/agent";
 
 export default function Page() {
   return <SimpleChatInterface />;
